@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PronunciaCoach TM - Entrenador de pronunciacion con Teachable Machine</title>
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@1.3.1/dist/tf.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/speech-commands@0.4.0/dist/speech-commands.min.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: linear-gradient(135deg, #0ea5e9 0%, #6366f1 100%);
+    min-height: 100vh;
+    padding: 20px;
+    color: #1f2937;
+  }
+  .container {
+    max-width: 1100px;
+    margin: 0 auto;
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    overflow: hidden;
+  }
+  header {
+    background: linear-gradient(135deg, #0369a1 0%, #4f46e5 100%);
+    color: white;
+    padding: 28px 32px;
+  }
+  header h1 { font-size: 28px; margin-bottom: 6px; }
+  header p { opacity: 0.9; font-size: 14px; }
+  .main { padding: 28px 32px; }
+  section { margin-bottom: 24px; }
+  h2 {
+    font-size: 18px;
+    margin-bottom: 12px;
+    color: #4f46e5;
+    border-bottom: 2px solid #e0e7ff;
+    padding-bottom: 6px;
+  }
+  input[type="text"] {
+    width: 100%;
+    padding: 12px 14px;
+    border: 2px solid #e5e7eb;
+    border-radius: 10px;
+    font-size: 14px;
+    transition: border 0.2s;
+  }
+  input[type="text"]:focus { outline: none; border-color: #4f46e5; }
+  .btn-row { display: flex; gap: 10px; margin-top: 10px; flex-wrap: wrap; }
+  button {
+    padding: 12px 20px;
+    border: none;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.1s, box-shadow 0.2s;
+  }
+  button:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+  button:disabled { opacity: 0.5; cursor: not-allowed; }
+  .btn-primary { background: #4f46e5; color: white; }
+  .btn-secondary { background: #e0e7ff; color: #4f46e5; }
+  .btn-danger { background: #ef4444; color: white; }
+  .btn-success { background: #10b981; color: white; }
+  .btn-outline { background: white; border: 2px solid #4f46e5; color: #4f46e5; }
+  .hint {
+    background: #fef3c7;
+    border-left: 4px solid #f59e0b;
+    padding: 12px 14px;
+    border-radius: 6px;
+    font-size: 13px;
+    margin-top: 10px;
+  }
+  .info-box {
+    background: #ede9fe;
+    border-left: 4px solid #7c3aed;
+    padding: 12px 14px;
+    border-radius: 6px;
+    font-size: 13px;
+    margin-top: 10px;
+  }
+  #live-panel { display: none; }
+  .mode-tabs { display: flex; gap: 8px; margin-bottom: 16px; }
+  .mode-tab {
+    flex: 1; padding: 10px; background: #f3f4f6; border: 2px solid transparent;
+    border-radius: 10px; cursor: pointer; text-align: center; font-weight: 600;
+    color: #6b7280; transition: all 0.2s;
+  }
+  .mode-tab.active { background: white; border-color: #4f46e5; color: #4f46e5; }
+
+  .mic-indicator {
+    display: flex; align-items: center; justify-content: center;
+    gap: 14px; padding: 20px; background: #0f172a; border-radius: 14px;
+    margin-bottom: 20px; color: #e2e8f0;
+  }
+  .mic-dot {
+    width: 16px; height: 16px; border-radius: 50%; background: #475569;
+    transition: background 0.1s;
+  }
+  .mic-dot.active { background: #22c55e; box-shadow: 0 0 20px #22c55e; animation: pulse 1.5s infinite; }
+  @keyframes pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.3); } }
+  .vol-bar {
+    flex: 1; height: 10px; background: #334155; border-radius: 5px; overflow: hidden;
+  }
+  .vol-bar-fill {
+    height: 100%; width: 0%;
+    background: linear-gradient(90deg, #22c55e, #eab308, #ef4444);
+    transition: width 0.1s;
+  }
+
+  .predictions-list { display: flex; flex-direction: column; gap: 8px; margin-top: 16px; }
+  .pred-row {
+    display: grid; grid-template-columns: 160px 1fr 50px;
+    gap: 10px; align-items: center;
+  }
+  .pred-label { font-size: 14px; font-weight: 600; text-transform: uppercase; }
+  .pred-bar-bg { background: #f3f4f6; height: 24px; border-radius: 12px; overflow: hidden; }
+  .pred-bar-fill {
+    height: 100%; background: linear-gradient(90deg, #a5b4fc, #4f46e5);
+    transition: width 0.25s ease; border-radius: 12px;
+  }
+  .pred-row.winner .pred-bar-fill { background: linear-gradient(90deg, #86efac, #10b981); }
+  .pred-val { font-size: 13px; text-align: right; font-variant-numeric: tabular-nums; color: #6b7280; }
+
+  .practice-panel {
+    background: linear-gradient(135deg, #ede9fe, #ddd6fe);
+    padding: 24px; border-radius: 14px; margin-bottom: 20px; text-align: center;
+  }
+  .target-label { font-size: 13px; color: #6d28d9; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
+  .target-word { font-size: 52px; font-weight: 800; color: #4c1d95; margin-bottom: 4px; letter-spacing: 2px; }
+  .target-pron { font-size: 16px; color: #6d28d9; font-style: italic; margin-bottom: 14px; }
+  .feedback { font-size: 16px; font-weight: 600; min-height: 48px; padding: 10px; border-radius: 8px; margin-top: 10px; }
+  .feedback.ok { background: #d1fae5; color: #065f46; }
+  .feedback.bad { background: #fee2e2; color: #991b1b; }
+  .feedback.wait { background: #e0f2fe; color: #075985; }
+
+  .stats-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 10px; margin-top: 16px;
+  }
+  .stat-card { background: #f9fafb; padding: 12px 14px; border-radius: 10px; border: 1px solid #e5e7eb; }
+  .stat-label { font-size: 11px; text-transform: uppercase; color: #6b7280; letter-spacing: 0.5px; }
+  .stat-value { font-size: 22px; font-weight: 700; color: #1f2937; margin-top: 2px; }
+
+  #session-log {
+    max-height: 180px; overflow-y: auto; background: #0f172a; color: #cbd5e1;
+    padding: 10px 12px; border-radius: 8px; font-family: 'SF Mono', Monaco, monospace;
+    font-size: 11px; margin-top: 10px;
+  }
+  .log-entry { padding: 2px 0; }
+  .log-entry.ok { color: #86efac; }
+  .log-entry.bad { color: #fca5a5; }
+  .log-ts { color: #64748b; }
+
+  .status-pill {
+    display: inline-block; padding: 4px 10px; border-radius: 12px;
+    font-size: 12px; font-weight: 600; margin-left: 10px;
+  }
+  .status-ok { background: #d1fae5; color: #065f46; }
+  .status-warn { background: #fed7aa; color: #9a3412; }
+  .status-off { background: #e5e7eb; color: #4b5563; }
+
+  footer {
+    padding: 16px 32px; background: #f9fafb; font-size: 12px;
+    color: #6b7280; text-align: center; border-top: 1px solid #e5e7eb;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+<header>
+  <h1>PronunciaCoach TM</h1>
+  <p>Entrena tu pronunciacion en ingles con tu propio modelo de Google Teachable Machine (Audio) - 100% en el navegador</p>
+</header>
+
+<div class="main">
+
+<section id="config-panel">
+  <h2>1. Configurar modelo</h2>
+  <p style="font-size:13px;color:#6b7280;margin-bottom:8px;">
+    Pega la URL que te dio Teachable Machine al exportar tu modelo Audio (TensorFlow.js -> Upload my model).
+    Debe tener 3-6 palabras objetivo + la clase <em>Background Noise</em> que TM agrega sola.
+  </p>
+  <input type="text" id="model-url" placeholder="https://teachablemachine.withgoogle.com/models/XXXXXXX/">
+
+  <div class="info-box">
+    <strong>Sugerencia:</strong> para hispanohablantes, los pares minimos mas utiles son:
+    <br>- <strong>ship / sheep</strong> (i corta vs larga)
+    <br>- <strong>think / sink</strong> (th vs s)
+    <br>- <strong>very / berry</strong> (v vs b)
+    <br>- <strong>road / load</strong> (r vs l)
+  </div>
+
+  <div class="btn-row">
+    <button class="btn-primary" onclick="startApp()">Iniciar entrenamiento</button>
+    <button class="btn-secondary" onclick="startDemoMode()">Modo demo (sin modelo)</button>
+  </div>
+  <div class="hint">
+    <strong>Tip exposicion:</strong> si falla la red o el modelo no carga,
+    el <em>Modo demo</em> simula predicciones y permite mostrar el flujo completo.
+  </div>
+</section>
+
+<section id="live-panel">
+  <h2>2. Entrenamiento activo
+    <span class="status-pill status-off" id="status-pill">Inactivo</span>
+  </h2>
+
+  <div class="mode-tabs">
+    <div class="mode-tab active" id="tab-practice" onclick="switchMode('practice')">Modo practica</div>
+    <div class="mode-tab" id="tab-free" onclick="switchMode('free')">Modo libre</div>
+  </div>
+
+  <div class="mic-indicator">
+    <div class="mic-dot" id="mic-dot"></div>
+    <div><strong>Microfono</strong><br><span id="mic-status" style="font-size:12px;color:#94a3b8">Esperando audio...</span></div>
+    <div class="vol-bar"><div class="vol-bar-fill" id="vol-fill"></div></div>
+  </div>
+
+  <div class="practice-panel" id="practice-panel">
+    <div class="target-label">Di esta palabra:</div>
+    <div class="target-word" id="target-word">—</div>
+    <div class="target-pron" id="target-pron"></div>
+    <div class="feedback wait" id="feedback">Escuchando... habla cerca al microfono.</div>
+    <div class="btn-row" style="justify-content:center;margin-top:12px;">
+      <button class="btn-outline" onclick="nextWord()">Siguiente palabra</button>
+      <button class="btn-secondary" onclick="skipWord()">Saltar</button>
+    </div>
+  </div>
+
+  <div class="predictions-list" id="predictions-list"></div>
+
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-label">Palabras practicadas</div>
+      <div class="stat-value" id="stat-attempted">0</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Aciertos</div>
+      <div class="stat-value" id="stat-hits">0</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">% precision</div>
+      <div class="stat-value" id="stat-accuracy">0%</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Racha actual</div>
+      <div class="stat-value" id="stat-streak">0</div>
+    </div>
+  </div>
+
+  <div id="session-log"></div>
+
+  <div class="btn-row" style="margin-top:12px;">
+    <button class="btn-success" onclick="exportReport()">Exportar JSON</button>
+    <button class="btn-danger" onclick="stopApp()">Terminar sesion</button>
+  </div>
+</section>
+
+</div>
+
+<footer>
+  PronunciaCoach TM | Proyecto academico | Pascual Bravo | Programacion Avanzada 2026
+  <br>Tecnologias: Teachable Machine Audio | TensorFlow.js | Speech Commands | Web Audio API
+</footer>
+
+</div>
+
+<script>
+// ============================================================
+// Estado global
+// ============================================================
+let recognizer = null;
+let classLabels = [];       // sin Background Noise
+let labelsFull = [];        // incluye Background Noise
+let isRunning = false;
+let demoMode = false;
+let currentMode = 'practice';
+let audioCtx = null, analyser = null, mediaStream = null, volumeLoopId = null;
+
+const session = {
+  session_id: null,
+  start: null, end: null,
+  model_url: null,
+  mode: null,
+  classes: [],
+  practice_attempts: [],   // {target, detected, confidence, correct, t}
+  free_detections: [],     // {word, confidence, t}
+  summary: {}
+};
+
+let currentTarget = null;
+let attemptStart = 0;
+let attempted = 0, hits = 0, streak = 0;
+let lastDetectedAt = 0;
+const DETECTION_COOLDOWN_MS = 1200;
+
+// Diccionario con transcripcion fonetica para palabras comunes
+const PRON = {
+  'ship': '/ɪ/ corta - labios relajados',
+  'sheep': '/i:/ larga - labios estirados',
+  'think': '/θ/ - lengua entre dientes',
+  'sink': '/s/ - lengua detras de dientes',
+  'very': '/v/ - labio inferior toca dientes superiores',
+  'berry': '/b/ - cierre total de labios',
+  'road': '/r/ - lengua sin tocar paladar',
+  'load': '/l/ - punta de lengua toca paladar',
+  'bit': '/ɪ/ corta',
+  'beat': '/i:/ larga',
+  'bad': 'vocal /æ/',
+  'bed': 'vocal /e/',
+  'live': '/ɪ/ corta',
+  'leave': '/i:/ larga',
+  'three': '/θr/ sin apoyo',
+  'tree': '/tr/ con t clara'
+};
+
+// ============================================================
+// Iniciar modo real
+// ============================================================
+async function startApp() {
+  const url = document.getElementById('model-url').value.trim();
+  if (!url) { alert('Pega la URL del modelo'); return; }
+  demoMode = false;
+  const base = url.endsWith('/') ? url : url + '/';
+
+  try {
+    setStatus('Cargando modelo...', 'warn');
+    recognizer = speechCommands.create('BROWSER_FFT', undefined,
+      base + 'model.json', base + 'metadata.json');
+    await recognizer.ensureModelLoaded();
+    labelsFull = recognizer.wordLabels();
+    // Filtrar la clase "Background Noise" de TM
+    classLabels = labelsFull.filter(l => l !== '_background_noise_' && l !== 'Background Noise');
+    if (classLabels.length < 2) throw new Error('El modelo debe tener al menos 2 palabras');
+
+    session.model_url = url;
+    session.classes = classLabels;
+    session.mode = 'teachable_machine_audio';
+    await setupMicVolume();
+    beginSession();
+    startListening();
+    setStatus('Escuchando', 'ok');
+  } catch (e) {
+    console.error(e);
+    alert('No se pudo cargar: ' + e.message + '\n\nVerifica la URL o usa Modo demo.');
+    setStatus('Error', 'warn');
+  }
+}
+
+async function startDemoMode() {
+  demoMode = true;
+  classLabels = ['ship', 'sheep', 'think', 'sink'];
+  labelsFull = ['_background_noise_', ...classLabels];
+  session.model_url = null;
+  session.classes = classLabels;
+  session.mode = 'demo_simulado';
+  try { await setupMicVolume(); } catch (_) { /* seguimos sin mic */ }
+  beginSession();
+  startDemoLoop();
+  setStatus('Demo', 'ok');
+}
+
+// ============================================================
+// Microfono (para indicador visual)
+// ============================================================
+async function setupMicVolume() {
+  mediaStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+  audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  const source = audioCtx.createMediaStreamSource(mediaStream);
+  analyser = audioCtx.createAnalyser();
+  analyser.fftSize = 256;
+  source.connect(analyser);
+  const data = new Uint8Array(analyser.frequencyBinCount);
+  const dot = document.getElementById('mic-dot');
+  const fill = document.getElementById('vol-fill');
+  const statusEl = document.getElementById('mic-status');
+  statusEl.textContent = 'Activo';
+  function tick() {
+    analyser.getByteFrequencyData(data);
+    const avg = data.reduce((a, b) => a + b, 0) / data.length;
+    const pct = Math.min(100, (avg / 60) * 100);
+    fill.style.width = pct + '%';
+    if (pct > 15) dot.classList.add('active'); else dot.classList.remove('active');
+    volumeLoopId = requestAnimationFrame(tick);
+  }
+  tick();
+}
+
+// ============================================================
+// Escucha real con Speech Commands
+// ============================================================
+function startListening() {
+  recognizer.listen(result => {
+    const scores = Array.from(result.scores);
+    // Construir predicciones ignorando background noise
+    const preds = labelsFull.map((label, i) => ({
+      label, score: scores[i]
+    })).filter(p => classLabels.includes(p.label));
+    // Renormalizar
+    const sum = preds.reduce((a, p) => a + p.score, 0) || 1;
+    preds.forEach(p => p.score = p.score / sum);
+    handlePredictions(preds);
+  }, {
+    includeSpectrogram: false,
+    probabilityThreshold: 0.60,
+    invokeCallbackOnNoiseAndUnknown: false,
+    overlapFactor: 0.50
+  });
+}
+
+// ============================================================
+// Loop demo
+// ============================================================
+function startDemoLoop() {
+  function tick() {
+    if (!isRunning) return;
+    // El objetivo es mas probable de "detectarse" pero con error
+    const target = currentTarget || classLabels[Math.floor(Math.random() * classLabels.length)];
+    const probs = classLabels.map(l => Math.random() * 0.3);
+    const favoredIdx = Math.random() < 0.7
+      ? classLabels.indexOf(target)
+      : Math.floor(Math.random() * classLabels.length);
+    probs[favoredIdx] += 0.4 + Math.random() * 0.4;
+    const sum = probs.reduce((a, b) => a + b, 0);
+    const preds = classLabels.map((l, i) => ({ label: l, score: probs[i] / sum }));
+    handlePredictions(preds);
+    setTimeout(() => { if (isRunning) tick(); }, 1800);
+  }
+  setTimeout(tick, 800);
+}
+
+// ============================================================
+// Procesar predicciones
+// ============================================================
+function handlePredictions(preds) {
+  // Ordenar por score desc
+  preds.sort((a, b) => b.score - a.score);
+  const best = preds[0];
+  renderPredictionBars(preds);
+
+  const now = Date.now();
+  if (now - lastDetectedAt < DETECTION_COOLDOWN_MS) return;
+  if (best.score < 0.4) return;
+  lastDetectedAt = now;
+
+  if (currentMode === 'practice') {
+    processPracticeAttempt(best);
+  } else {
+    session.free_detections.push({ word: best.label, confidence: +best.score.toFixed(3), t: now });
+    appendLog(best.label, best.score, null);
+  }
+}
+
+function renderPredictionBars(preds) {
+  const rows = document.querySelectorAll('.pred-row');
+  for (let i = 0; i < preds.length && i < rows.length; i++) {
+    const pct = Math.round(preds[i].score * 100);
+    rows[i].querySelector('.pred-label').textContent = preds[i].label;
+    rows[i].querySelector('.pred-bar-fill').style.width = pct + '%';
+    rows[i].querySelector('.pred-val').textContent = pct + '%';
+    rows[i].classList.toggle('winner', i === 0);
+  }
+}
+
+function processPracticeAttempt(best) {
+  if (!currentTarget) return;
+  attempted++;
+  const correct = best.label === currentTarget;
+  if (correct) {
+    hits++;
+    streak++;
+    showFeedback('Correcto! Sonaste muy claro.', 'ok');
+  } else {
+    streak = 0;
+    showFeedback(`Sono mas como "${best.label}". Intenta de nuevo marcando mas el sonido.`, 'bad');
+  }
+  session.practice_attempts.push({
+    target: currentTarget,
+    detected: best.label,
+    confidence: +best.score.toFixed(3),
+    correct,
+    t: Date.now()
+  });
+  appendLog(best.label, best.score, correct ? currentTarget : null, correct);
+  updateStats();
+  if (correct) {
+    setTimeout(() => nextWord(), 1500);
+  }
+}
+
+function updateStats() {
+  document.getElementById('stat-attempted').textContent = attempted;
+  document.getElementById('stat-hits').textContent = hits;
+  document.getElementById('stat-accuracy').textContent =
+    attempted ? Math.round(100 * hits / attempted) + '%' : '0%';
+  document.getElementById('stat-streak').textContent = streak;
+}
+
+function showFeedback(msg, type) {
+  const el = document.getElementById('feedback');
+  el.textContent = msg;
+  el.className = 'feedback ' + type;
+}
+
+function appendLog(detected, prob, target, correct) {
+  const log = document.getElementById('session-log');
+  const t = new Date().toLocaleTimeString();
+  const entry = document.createElement('div');
+  const cls = correct === true ? 'ok' : correct === false ? 'bad' : '';
+  entry.className = 'log-entry ' + cls;
+  const marker = correct === true ? 'OK' : correct === false ? 'XX' : '--';
+  const tgtTxt = target ? `-> target "${target}"` : '';
+  entry.innerHTML = `<span class="log-ts">[${t}]</span> ${marker} detectado "${detected}" (${(prob*100).toFixed(0)}%) ${tgtTxt}`;
+  log.appendChild(entry);
+  log.scrollTop = log.scrollHeight;
+  while (log.children.length > 60) log.removeChild(log.firstChild);
+}
+
+// ============================================================
+// Modo practica - palabras objetivo
+// ============================================================
+function nextWord() {
+  if (!classLabels.length) return;
+  const others = classLabels.filter(w => w !== currentTarget);
+  currentTarget = others.length ? others[Math.floor(Math.random() * others.length)] : classLabels[0];
+  document.getElementById('target-word').textContent = currentTarget.toUpperCase();
+  document.getElementById('target-pron').textContent = PRON[currentTarget.toLowerCase()] || '';
+  showFeedback('Escuchando... habla cerca al microfono.', 'wait');
+}
+
+function skipWord() {
+  nextWord();
+}
+
+function switchMode(mode) {
+  currentMode = mode;
+  document.getElementById('tab-practice').classList.toggle('active', mode === 'practice');
+  document.getElementById('tab-free').classList.toggle('active', mode === 'free');
+  document.getElementById('practice-panel').style.display = mode === 'practice' ? 'block' : 'none';
+  if (mode === 'practice' && !currentTarget) nextWord();
+}
+
+// ============================================================
+// Inicio / fin de sesion
+// ============================================================
+function beginSession() {
+  session.session_id = 'ses_' + Date.now();
+  session.start = new Date().toISOString();
+  session.practice_attempts = [];
+  session.free_detections = [];
+  attempted = 0; hits = 0; streak = 0; currentTarget = null;
+  isRunning = true;
+
+  document.getElementById('config-panel').style.display = 'none';
+  document.getElementById('live-panel').style.display = 'block';
+
+  const list = document.getElementById('predictions-list');
+  list.innerHTML = '';
+  for (let i = 0; i < classLabels.length; i++) {
+    const row = document.createElement('div');
+    row.className = 'pred-row';
+    row.innerHTML = `
+      <div class="pred-label">${classLabels[i]}</div>
+      <div class="pred-bar-bg"><div class="pred-bar-fill" style="width:0%"></div></div>
+      <div class="pred-val">0%</div>`;
+    list.appendChild(row);
+  }
+  updateStats();
+  switchMode('practice');
+}
+
+function stopApp() {
+  isRunning = false;
+  if (recognizer && recognizer.isListening()) recognizer.stopListening();
+  if (volumeLoopId) cancelAnimationFrame(volumeLoopId);
+  if (mediaStream) mediaStream.getTracks().forEach(t => t.stop());
+  if (audioCtx) audioCtx.close();
+  session.end = new Date().toISOString();
+  setStatus('Sesion terminada', 'warn');
+  if (confirm('Sesion terminada. Descargar reporte JSON?')) exportReport();
+  setTimeout(() => {
+    document.getElementById('live-panel').style.display = 'none';
+    document.getElementById('config-panel').style.display = 'block';
+    setStatus('Inactivo', 'off');
+  }, 500);
+}
+
+function buildSummary() {
+  const total = session.practice_attempts.length;
+  const correct = session.practice_attempts.filter(a => a.correct).length;
+  const byTarget = {};
+  session.practice_attempts.forEach(a => {
+    if (!byTarget[a.target]) byTarget[a.target] = { attempted: 0, correct: 0 };
+    byTarget[a.target].attempted++;
+    if (a.correct) byTarget[a.target].correct++;
+  });
+  // Palabras mas dificiles
+  const difficulty = Object.entries(byTarget)
+    .map(([w, s]) => ({ word: w, accuracy: s.attempted ? +(s.correct / s.attempted).toFixed(2) : 0, attempts: s.attempted }))
+    .sort((a, b) => a.accuracy - b.accuracy);
+  return {
+    total_attempts: total,
+    correct,
+    accuracy: total ? +(correct / total * 100).toFixed(1) : 0,
+    by_word: byTarget,
+    hardest_words: difficulty.slice(0, 3),
+    free_detections_count: session.free_detections.length,
+    recommendation: total === 0 ? 'Practica mas palabras.'
+      : difficulty[0] && difficulty[0].accuracy < 0.5
+        ? `Enfocate en la palabra "${difficulty[0].word}" (precision ${(difficulty[0].accuracy*100).toFixed(0)}%)`
+        : 'Buen desempeno. Prueba palabras mas dificiles.'
+  };
+}
+
+async function exportReport() {
+  session.summary = buildSummary();
+  const jsonStr = JSON.stringify(session, null, 2);
+  const filename = `pronunciacoach_${session.session_id || Date.now()}.json`;
+  try {
+    if (window.claude && typeof window.claude.use === 'function') {
+      const downloads = await window.claude.use('downloads');
+      if (downloads) { await downloads.save({ filename, data: jsonStr }); return; }
+    }
+  } catch (e) { console.warn('API downloads no disponible', e); }
+  const blob = new Blob([jsonStr], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click(); a.remove();
+  URL.revokeObjectURL(url);
+}
+
+function setStatus(txt, type) {
+  const p = document.getElementById('status-pill');
+  p.textContent = txt;
+  p.className = 'status-pill ' + (type === 'ok' ? 'status-ok' : type === 'warn' ? 'status-warn' : 'status-off');
+}
+</script>
+</body>
+</html>

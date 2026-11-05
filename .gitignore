@@ -1,0 +1,26 @@
+# Reportes de sesión generados por la app
+posturapro_*.json
+
+# Modelos descargados localmente
+models/
+*.bin
+*weights*
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editores
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Node (por si se agrega build en el futuro)
+node_modules/
+dist/
+build/
+.env
+.env.local
