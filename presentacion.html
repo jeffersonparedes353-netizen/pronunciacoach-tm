@@ -1,0 +1,1521 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Presentación · PronunciaCoach TM</title>
+<meta name="description" content="Presentación del proyecto PronunciaCoach TM con glosario interactivo de términos técnicos.">
+<meta name="theme-color" content="#04263a">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='6' fill='rgb(8,98,136)'/%3E%3Cg fill='none' stroke='white' stroke-width='2' stroke-linecap='round'%3E%3Crect x='9' y='4' width='6' height='10' rx='3'/%3E%3Cpath d='M18 11a6 6 0 0 1-12 0M12 17v3'/%3E%3C/g%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #04263a;
+    --ink-2: #065274;
+    --brand: #086288;
+    --brand-dark: #064d6b;
+    --violet: #4d8dba;
+    --cyan: #97d7ff;
+    --cream: #ffefc4;
+    --ok: #10b981;
+    --bad: #ef4444;
+    --text: #1f2937;
+    --body: #4b5563;
+    --muted: #6b7280;
+    --line: #dfe9f0;
+    --surface-2: #f4f9fc;
+    --lav: #e6f4ff;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body {
+    font-family: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background:
+      radial-gradient(900px 500px at 0% -10%, rgba(8,98,136,0.55), transparent 60%),
+      radial-gradient(800px 500px at 100% 0%, rgba(151,215,255,0.30), transparent 60%),
+      var(--ink);
+    color: var(--text);
+    height: 100vh; height: 100dvh; overflow: hidden;
+    display: flex; flex-direction: column;
+    --side: 84px;
+  }
+  /* Sin animaciones mientras carga la pagina */
+  body.preload *, body.preload *::before { transition: none !important; }
+  .sr-only { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+  a { color: var(--brand-dark); }
+  .ico { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex: 0 0 auto; }
+
+  /* ===== Barra superior ===== */
+  .topbar {
+    position: relative; z-index: 50; flex: 0 0 auto; padding: 8px 12px;
+    background: rgba(4,38,58,0.9); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+  }
+  .topbar-inner { display: flex; align-items: center; gap: 6px; }
+  button.tb-link { border: none; background: none; cursor: pointer; font: inherit; }
+  .tb-count {
+    flex: 0 0 auto; padding: 5px 11px; border-radius: 999px; background: rgba(255,255,255,0.08);
+    color: #cbd5e1; font-size: 13px; font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap;
+  }
+  .tb-link {
+    display: inline-flex; align-items: center; gap: 6px; padding: 8px 12px; border-radius: 10px;
+    color: #e2e8f0; text-decoration: none; font-size: 14px; font-weight: 600; white-space: nowrap;
+  }
+  .tb-link:hover { background: rgba(255,255,255,0.08); }
+  .tb-link .ico { width: 18px; height: 18px; }
+  .tb-title { flex: 1; text-align: center; color: #fff; font-weight: 700; font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .tb-title span { color: var(--cyan); }
+  .progress { position: absolute; left: 0; bottom: -1px; height: 3px; width: 0; background: linear-gradient(90deg, var(--cyan), var(--cream)); }
+
+  /* ===== Estructura: barra lateral + escenario ===== */
+  .layout { flex: 1; min-height: 0; display: flex; position: relative; }
+  .sidebar {
+    flex: 0 0 264px; width: 264px; margin-left: -264px; min-height: 0;
+    display: flex; flex-direction: column;
+    background: rgba(4,38,58,0.55); border-right: 1px solid rgba(255,255,255,0.08);
+    transition: margin-left 0.3s ease, transform 0.3s ease;
+  }
+  body.side-open .sidebar { margin-left: 0; }
+  .side-head { padding: 18px 18px 8px; font-size: 11px; font-weight: 700; letter-spacing: 2px; color: var(--cream); }
+  .side-list { position: relative; list-style: none; flex: 1; min-height: 0; overflow-y: auto; padding: 4px 10px 12px; }
+  .side-list a {
+    display: flex; align-items: center; gap: 10px; padding: 9px 10px; border-radius: 10px;
+    color: #cbd5e1; text-decoration: none; font-size: 14px; font-weight: 500; line-height: 1.3;
+    transition: background 0.15s, color 0.15s;
+  }
+  .side-list a b { flex: 0 0 24px; font-size: 12px; color: rgba(255,255,255,0.4); font-variant-numeric: tabular-nums; }
+  .side-list a:hover { background: rgba(255,255,255,0.06); color: #fff; }
+  .side-list a[aria-current="true"] { background: linear-gradient(90deg, rgba(151,215,255,0.2), rgba(77,141,186,0.2)); color: #fff; font-weight: 700; }
+  .side-list a[aria-current="true"] b { color: var(--cream); }
+  .side-foot { padding: 12px 18px 16px; border-top: 1px solid rgba(255,255,255,0.08); font-size: 12px; line-height: 1.6; color: rgba(255,255,255,0.55); }
+  .side-foot a { color: var(--cyan); font-weight: 600; text-decoration: none; }
+  .scrim { display: none; }
+
+  .stage { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+  .viewport { flex: 1; min-height: 0; position: relative; overflow: hidden; overflow: clip; }
+  /* Las diapositivas van una al lado de la otra y el carril se desplaza de lado */
+  .track {
+    height: 100%; display: grid; grid-auto-flow: column; grid-auto-columns: 100%; grid-template-rows: 100%;
+    transition: transform 0.55s cubic-bezier(0.22, 0.8, 0.2, 1);
+  }
+  .nav-arrow {
+    position: absolute; top: 50%; z-index: 5; transform: translateY(-50%);
+    width: 52px; height: 52px; border-radius: 50%; display: grid; place-items: center; cursor: pointer;
+    color: #fff; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);
+    backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+    transition: background 0.2s, opacity 0.2s, transform 0.2s;
+  }
+  .nav-arrow .ico { width: 26px; height: 26px; }
+  .nav-arrow.prev { left: 16px; }
+  .nav-arrow.next { right: 16px; }
+  .nav-arrow:hover:not(:disabled) { background: linear-gradient(135deg, var(--violet), var(--brand)); border-color: transparent; transform: translateY(-50%) scale(1.06); }
+  .nav-arrow:disabled { opacity: 0.25; cursor: default; }
+  .nav-arrow:focus-visible, .mn-btn:focus-visible { outline: 3px solid var(--cyan); outline-offset: 2px; }
+  .mobile-nav { display: none; }
+
+  /* ===== Diapositivas ===== */
+  .slide {
+    position: relative; justify-self: center; width: min(1100px, calc(100% - 2 * var(--side)));
+    margin: 16px 0; display: flex; flex-direction: column;
+    overflow-y: auto; overflow-x: hidden; overscroll-behavior: contain;
+    background: #fff; border-radius: 24px; padding: 32px 44px; box-shadow: 0 30px 80px rgba(0,0,0,0.35);
+  }
+  /* Aviso de que la diapositiva tiene mas contenido abajo */
+  .more-hint {
+    position: absolute; left: 50%; bottom: 26px; z-index: 6; transform: translateX(-50%);
+    display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px 7px 10px; border-radius: 999px; cursor: pointer;
+    border: none; font: inherit; font-size: 13px; font-weight: 700; color: #fff;
+    background: linear-gradient(135deg, var(--violet), var(--brand)); box-shadow: 0 8px 22px rgba(4,38,58,0.35);
+    animation: nudge 1.8s ease-in-out infinite;
+  }
+  .more-hint[hidden] { display: none; }
+  .more-hint .ico { width: 16px; height: 16px; }
+  @keyframes nudge { 0%, 100% { transform: translate(-50%, 0); } 50% { transform: translate(-50%, 4px); } }
+  /* Tarjetas compactas: icono al lado del titulo */
+  .cards-inline .card { display: grid; grid-template-columns: auto 1fr; align-items: center; column-gap: 12px; padding: 18px; }
+  .cards-inline .icon-badge { width: 38px; height: 38px; border-radius: 12px; margin: 0; }
+  .cards-inline .icon-badge .ico { width: 19px; height: 19px; }
+  .cards-inline .card h3 { margin: 0; font-size: 17px; }
+  .cards-inline .card p { grid-column: 1 / -1; margin-top: 8px; }
+  /* Contenido centrado en vertical; si no cabe, se desplaza dentro de la diapositiva */
+  .slide > .slide-head { margin-top: auto; }
+  .slide > .notes { margin-bottom: auto; }
+  #glosario > .slide-head { margin-top: 0; }
+  .slide > .hint, .slide > .btn-app { align-self: flex-start; }
+  .slide.dark { background: linear-gradient(135deg, #04263a 0%, #064863 55%, #086288 100%); color: #fff; }
+  .slide-head { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 12px; }
+  .slide-num {
+    font-size: 12px; font-weight: 800; font-variant-numeric: tabular-nums;
+    color: var(--brand); background: var(--lav); padding: 4px 10px; border-radius: 999px;
+  }
+  .dark .slide-num { background: rgba(255,255,255,0.1); color: var(--cyan); }
+  .kicker { font-size: 13px; font-weight: 700; letter-spacing: 3px; color: var(--brand); }
+  .dark .kicker { color: var(--cream); }
+  .slide-title {
+    font-size: clamp(26px, 4vw, 38px); font-weight: 800; line-height: 1.15; letter-spacing: -0.5px;
+    color: var(--ink); margin-bottom: 18px; max-width: 900px;
+  }
+  .dark .slide-title { color: #fff; }
+  .lead { font-size: 17px; line-height: 1.6; color: var(--body); max-width: 780px; }
+  .dark .lead { color: rgba(255,255,255,0.8); }
+  .mt { margin-top: 24px; }
+  .mt-s { margin-top: 12px; }
+
+  .grid-2, .grid-3, .grid-auto { display: grid; gap: 16px; }
+  .grid-2 { grid-template-columns: repeat(2, 1fr); }
+  .grid-3 { grid-template-columns: repeat(3, 1fr); }
+  .grid-auto { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+
+  .card { background: var(--surface-2); border: 1px solid var(--line); border-radius: 18px; padding: 22px; }
+  .card h3 { font-size: 19px; font-weight: 700; color: var(--ink); margin: 4px 0 8px; }
+  .card p, .card li { font-size: 15px; line-height: 1.55; color: var(--body); }
+  .label { display: block; font-size: 11px; font-weight: 700; letter-spacing: 1.5px; color: var(--muted); }
+  .icon-badge {
+    width: 44px; height: 44px; border-radius: 14px; display: grid; place-items: center;
+    color: #fff; background: linear-gradient(135deg, var(--violet), var(--brand)); margin-bottom: 14px;
+  }
+  .icon-badge .ico { width: 22px; height: 22px; }
+  .icon-badge.green { background: linear-gradient(135deg, #10b981, #0d9488); }
+  .icon-badge.grey { background: linear-gradient(135deg, #94a3b8, #64748b); }
+  .icon-badge.warm { background: linear-gradient(135deg, #e9a23b, #d97706); }
+
+  .callout {
+    margin-top: 22px; display: flex; gap: 12px; align-items: flex-start; padding: 14px 18px;
+    border-radius: 14px; background: var(--cream); color: #063a52; font-weight: 600; font-size: 15px; line-height: 1.5;
+  }
+  .callout .ico { margin-top: 1px; }
+  .callout.green { background: #ecfdf5; color: #065f46; }
+  .dark .callout { background: rgba(255,255,255,0.08); color: #e2e8f0; }
+
+  /* Diapo 2: cifras */
+  .stat-card .ico { width: 26px; height: 26px; color: var(--brand); margin-bottom: 10px; }
+  .stat {
+    font-size: clamp(44px, 6vw, 60px); font-weight: 800; line-height: 1; letter-spacing: -1px;
+    background: linear-gradient(135deg, #086288, var(--violet)); -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .stat-title { font-size: 17px; font-weight: 700; color: var(--ink) !important; margin-top: 10px; }
+  .stat-sub { font-size: 14px !important; color: var(--muted) !important; margin-top: 2px; }
+
+  /* Diapos 4 y 8: pasos */
+  .steps { list-style: none; display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 26px; position: relative; }
+  .steps.four { grid-template-columns: repeat(4, 1fr); }
+  .step {
+    position: relative; display: flex; flex-direction: column; align-items: center; gap: 10px; text-align: center;
+    padding: 22px 16px; border-radius: 18px; background: var(--surface-2); border: 1px solid var(--line);
+  }
+  .dark .step { background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.12); }
+  .step-n {
+    width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; font-weight: 800; font-size: 18px;
+    color: #fff; background: linear-gradient(135deg, var(--violet), var(--brand)); box-shadow: 0 8px 20px rgba(8,98,136,0.35);
+  }
+  .dark .step-n { background: var(--cream); color: var(--ink); box-shadow: 0 8px 20px rgba(0,0,0,0.25); }
+  .step .ico { width: 28px; height: 28px; color: var(--brand); }
+  .dark .step .ico { color: var(--cyan); }
+  .step strong { font-size: 18px; color: var(--ink); }
+  .dark .step strong { color: #fff; font-size: 16px; }
+
+  /* Diapo 5: motores */
+  .engine-top { display: flex; align-items: center; gap: 12px; margin-bottom: 4px; }
+  .engine-top .icon-badge { margin-bottom: 0; }
+  .checks { list-style: none; margin-top: 14px; display: grid; gap: 8px; }
+  .checks li { display: flex; gap: 10px; align-items: flex-start; font-weight: 600; color: var(--text) !important; }
+  .checks .ico { width: 18px; height: 18px; color: var(--ok); margin-top: 2px; }
+
+  /* Diapo 6: flujo */
+  .pipeline { display: grid; grid-template-columns: 1fr auto 1fr auto 1fr auto 1fr; align-items: stretch; gap: 10px; }
+  .pipe-arrow { display: grid; place-items: center; color: var(--brand); }
+  .pipe-arrow .ico { width: 22px; height: 22px; }
+  .pipeline .card { padding: 18px; }
+  .pipeline .card h3 { font-size: 18px; }
+  .pipeline .card p { font-size: 14px; }
+  .note-box {
+    margin-top: 18px; display: flex; gap: 12px; align-items: flex-start; padding: 16px 18px; border-radius: 14px;
+    border: 1px dashed #97d7ff; background: #f3faff; font-size: 15px; line-height: 1.55; color: var(--body);
+  }
+  .note-box .ico { color: var(--brand); margin-top: 2px; }
+
+  /* Diapo 7: tabla */
+  .table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 16px; }
+  table { width: 100%; border-collapse: collapse; font-size: 15px; min-width: 640px; }
+  th { text-align: left; background: var(--ink); color: #fff; padding: 13px 16px; font-size: 13px; letter-spacing: 0.5px; font-weight: 700; }
+  td { padding: 13px 16px; border-top: 1px solid var(--line); vertical-align: top; line-height: 1.45; color: var(--body); }
+  td:first-child { font-weight: 700; color: var(--ink); white-space: nowrap; }
+  tr:nth-child(even) td { background: var(--surface-2); }
+  .cost {
+    margin-top: 22px; display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 14px;
+    padding: 18px 22px; border-radius: 18px; background: #ecfdf5; border: 1px solid #a7f3d0;
+  }
+  .cost span { font-size: 16px; font-weight: 600; color: #065f46; }
+  .cost strong { font-size: 34px; font-weight: 800; color: #047857; letter-spacing: -0.5px; }
+
+  /* Diapo 8: demo */
+  .word-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+  .word-chips span {
+    padding: 6px 14px; border-radius: 999px; font-weight: 700; font-size: 16px;
+    background: rgba(151,215,255,0.15); color: var(--cyan); border: 1px solid rgba(151,215,255,0.35);
+  }
+  .btn-app {
+    display: inline-flex; align-items: center; gap: 8px; margin-top: 24px; padding: 13px 22px; border-radius: 12px;
+    background: linear-gradient(135deg, var(--violet), var(--brand)); color: #fff; font-weight: 700; text-decoration: none;
+    box-shadow: 0 10px 26px rgba(8,98,136,0.4); transition: transform 0.15s;
+  }
+  .btn-app:hover { transform: translateY(-2px); }
+
+  /* Diapo 10: comparacion */
+  .compare .card { position: relative; }
+  .compare .bad { background: #fef2f2; border-color: #fecaca; }
+  .compare .good { background: #ecfdf5; border-color: #a7f3d0; }
+  .verdict { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 800; letter-spacing: 1.5px; padding: 4px 10px; border-radius: 999px; color: #fff; }
+  .bad .verdict { background: var(--bad); }
+  .good .verdict { background: var(--ok); }
+  .verdict .ico { width: 14px; height: 14px; stroke-width: 3; }
+  .result { margin-top: 12px; font-weight: 700; color: var(--ink) !important; }
+  .split { display: flex; gap: 3px; margin: 14px 0 6px; }
+  .split i { flex: 1; height: 18px; border-radius: 4px; }
+  .split .tr { background: var(--brand); }
+  .split .te { background: var(--cyan); }
+  .split.takes { gap: 8px; }
+  .split.takes b { flex: 1; display: flex; gap: 2px; }
+  .split-legend { display: flex; gap: 14px; font-size: 12px; color: var(--muted); }
+  .split-legend span::before { content: ''; display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 5px; vertical-align: -1px; }
+  .split-legend .l-tr::before { background: var(--brand); }
+  .split-legend .l-te::before { background: var(--cyan); }
+
+  /* Diapo 11: listas */
+  .ilist { list-style: none; display: grid; gap: 10px; margin-top: 8px; }
+  .ilist li { display: flex; gap: 10px; align-items: flex-start; }
+  .ilist .ico { width: 18px; height: 18px; margin-top: 3px; }
+  .ilist.warn .ico { color: #d97706; }
+  .ilist.safe .ico { color: var(--brand); }
+
+  /* Diapo 12: dificultades (problema -> solucion) */
+  .diff-head, .diff-row { display: grid; grid-template-columns: 1fr 28px 1fr; gap: 10px; align-items: stretch; }
+  .diff-head { margin-bottom: 8px; }
+  .diff-head span { font-size: 11px; font-weight: 700; letter-spacing: 1.5px; color: var(--muted); }
+  .diff-list { display: grid; gap: 10px; }
+  .diff-problem, .diff-fix { display: flex; gap: 10px; align-items: center; padding: 12px 14px; border-radius: 14px; font-size: 15px; line-height: 1.45; }
+  .diff-problem { background: #fff7ed; border: 1px solid #fed7aa; color: #7c2d12; }
+  .diff-fix { background: #ecfdf5; border: 1px solid #a7f3d0; color: #065f46; font-weight: 600; }
+  .diff-problem .ico { color: #ea580c; }
+  .diff-fix .ico { color: var(--ok); }
+  .diff-arrow { display: grid; place-items: center; color: var(--muted); }
+  @media (max-width: 640px) {
+    .diff-head { display: none; }
+    .diff-list { gap: 20px; }
+    .diff-row { grid-template-columns: 1fr; gap: 6px; }
+    .diff-arrow { transform: rotate(90deg); height: 18px; }
+  }
+
+  /* Diapo 13: frase final */
+  .quote {
+    margin-top: 24px; padding: 24px 28px; border-radius: 20px; color: #fff;
+    background: linear-gradient(135deg, var(--ink), #086288); font-size: clamp(19px, 2.6vw, 24px); font-weight: 700; line-height: 1.4;
+  }
+  .quote::before { content: '\201C'; display: block; font-size: 48px; line-height: 0.6; color: var(--cream); margin-bottom: 6px; }
+
+  /* Portada y cierre */
+  .hero { padding-bottom: 72px; }
+  .hero-brand { display: flex; align-items: center; gap: 18px; margin: 14px 0 10px; }
+  .hero h1 { font-size: clamp(36px, 6vw, 56px); font-weight: 800; letter-spacing: -1px; line-height: 1.05; }
+  .tm-badge {
+    display: inline-block; vertical-align: middle; font-size: 14px; font-weight: 700; letter-spacing: 1px;
+    padding: 4px 10px; border-radius: 999px; background: linear-gradient(90deg, var(--cyan), var(--cream)); color: var(--ink);
+  }
+  .logo {
+    position: relative; flex: 0 0 auto; width: 64px; height: 64px; border-radius: 50%; display: grid; place-items: center;
+    background: linear-gradient(135deg, var(--violet), var(--brand)); box-shadow: 0 10px 30px rgba(8,98,136,0.5);
+  }
+  .logo .ico { width: 30px; height: 30px; color: #fff; position: relative; z-index: 1; }
+  .logo-ring { position: absolute; inset: 0; border-radius: 50%; border: 2px solid rgba(151,215,255,0.7); animation: ripple 2.4s ease-out infinite; }
+  .logo-ring.d2 { animation-delay: 1.2s; }
+  @keyframes ripple { 0% { transform: scale(1); opacity: 0.9; } 100% { transform: scale(1.9); opacity: 0; } }
+  .meta { display: grid; grid-template-columns: repeat(2, minmax(0, 280px)); gap: 28px; margin-top: 28px; }
+  .meta .label { color: var(--cream); margin-bottom: 8px; }
+  .meta ul { list-style: none; display: grid; gap: 4px; font-size: 17px; font-weight: 600; }
+  .meta .big { font-size: 22px; font-weight: 800; color: #fff; }
+  .meta p { color: rgba(255,255,255,0.78); font-size: 16px; }
+  .hint {
+    display: inline-flex; align-items: center; gap: 8px; margin-top: 28px; padding: 9px 14px; border-radius: 12px;
+    background: rgba(151,215,255,0.12); border: 1px solid rgba(151,215,255,0.3); color: #e6f6ff; font-size: 14px;
+  }
+  .toc { margin-top: 22px; display: flex; flex-wrap: wrap; gap: 8px; }
+  .toc a {
+    display: inline-flex; align-items: center; gap: 8px; padding: 7px 12px; border-radius: 999px; font-size: 13px; font-weight: 600;
+    color: #e2e8f0; text-decoration: none; background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.12);
+    transition: background 0.2s, border-color 0.2s;
+  }
+  .toc a:hover { background: rgba(151,215,255,0.15); border-color: rgba(151,215,255,0.4); }
+  .toc b { color: var(--cream); font-variant-numeric: tabular-nums; }
+
+  .waves { position: absolute; inset: 0; overflow: hidden; pointer-events: none; border-radius: inherit; }
+  .waves span { position: absolute; left: 0; right: 0; background-repeat: repeat-x; pointer-events: none; }
+  .waves .w1 {
+    height: 60px; bottom: 6px; background-size: 240px 60px; animation: waveA 7s linear infinite;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='60'%3E%3Cpath d='M0 30 C 40 0, 80 0, 120 30 S 200 60, 240 30' fill='none' stroke='rgba(151,215,255,0.55)' stroke-width='2'/%3E%3C/svg%3E");
+  }
+  .waves .w2 {
+    height: 90px; bottom: -14px; background-size: 360px 90px; animation: waveB 12s linear infinite;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='360' height='90'%3E%3Cpath d='M0 45 C 60 0, 120 0, 180 45 S 300 90, 360 45' fill='none' stroke='rgba(255,239,196,0.5)' stroke-width='2'/%3E%3C/svg%3E");
+  }
+  @keyframes waveA { to { background-position-x: -240px; } }
+  @keyframes waveB { to { background-position-x: 360px; } }
+
+  .closing { text-align: center; padding-bottom: 80px; }
+  .closing .slide-head { justify-content: center; }
+  .closing .slide-title { font-size: clamp(40px, 7vw, 64px); margin: 0 auto 26px; }
+  .closing .meta { justify-content: center; text-align: left; grid-template-columns: repeat(2, minmax(0, 300px)); }
+  .gh-link {
+    display: inline-flex; align-items: center; gap: 8px; margin-top: 8px; color: var(--cyan); font-weight: 600;
+    text-decoration: none; word-break: break-all;
+  }
+  .gh-link:hover { text-decoration: underline; }
+  .closing-foot { margin-top: 30px; color: rgba(255,255,255,0.7); font-size: 14px; line-height: 1.7; }
+
+  /* Notas del presentador */
+  .notes { margin-top: 26px; border-top: 1px dashed var(--line); padding-top: 14px; }
+  .dark .notes { border-top-color: rgba(255,255,255,0.15); }
+  .notes summary {
+    display: inline-flex; align-items: center; gap: 6px; cursor: pointer; list-style: none;
+    font-size: 13px; font-weight: 600; color: var(--muted); padding: 4px 8px; border-radius: 8px; margin-left: -8px;
+  }
+  .notes summary:hover { background: var(--surface-2); color: var(--brand-dark); }
+  .dark .notes summary { color: rgba(255,255,255,0.65); }
+  .dark .notes summary:hover { background: rgba(255,255,255,0.08); color: #fff; }
+  .notes summary::-webkit-details-marker { display: none; }
+  .notes summary .ico { width: 16px; height: 16px; transition: transform 0.2s; }
+  .notes[open] summary .ico { transform: rotate(90deg); }
+  .notes p {
+    margin-top: 10px; font-size: 14px; line-height: 1.6; color: var(--body);
+    background: var(--surface-2); padding: 12px 14px; border-radius: 12px; text-align: left;
+  }
+  .dark .notes p { background: rgba(255,255,255,0.07); color: rgba(255,255,255,0.85); }
+
+  /* ===== Terminos con significado ===== */
+  .term {
+    cursor: pointer; border-bottom: 2px dotted var(--brand); border-radius: 3px;
+    background: linear-gradient(transparent 62%, rgba(8,98,136,0.14) 62%);
+    transition: background 0.15s;
+  }
+  .term:hover, .term[aria-expanded="true"] { background: rgba(8,98,136,0.18); }
+  .term:focus-visible { outline: 2px solid var(--cyan); outline-offset: 2px; }
+  .dark .term, .quote .term { border-bottom-color: var(--cyan); background: linear-gradient(transparent 62%, rgba(151,215,255,0.18) 62%); }
+  .dark .term:hover, .dark .term[aria-expanded="true"] { background: rgba(151,215,255,0.25); }
+  .stat-card .term, .slide-title .term { background: none; }
+
+  .gloss-pop {
+    position: fixed; z-index: 100; width: min(360px, calc(100vw - 24px)); padding: 16px 18px 14px;
+    background: #fff; color: var(--text); border-radius: 16px; border: 1px solid var(--line);
+    box-shadow: 0 20px 50px rgba(4,38,58,0.35); animation: popIn 0.16s ease-out;
+  }
+  .gloss-pop[hidden] { display: none; }
+  .gloss-pop:focus { outline: none; }
+  @keyframes popIn { from { opacity: 0; transform: translateY(4px); } }
+  .gloss-pop.above { animation-name: popInUp; }
+  @keyframes popInUp { from { opacity: 0; transform: translateY(-4px); } }
+  .gp-arrow {
+    position: absolute; top: -7px; width: 14px; height: 14px; background: #fff;
+    border-left: 1px solid var(--line); border-top: 1px solid var(--line); transform: rotate(45deg);
+  }
+  .gloss-pop.above .gp-arrow { top: auto; bottom: -7px; transform: rotate(225deg); }
+  .gp-head { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 8px; }
+  .gp-head .ico { color: var(--brand); margin-top: 2px; }
+  .gp-head strong { flex: 1; font-size: 16px; line-height: 1.3; color: var(--ink); }
+  .gp-close {
+    border: none; background: none; cursor: pointer; color: var(--muted); padding: 2px; border-radius: 6px; line-height: 0;
+  }
+  .gp-close:hover { background: var(--surface-2); color: var(--ink); }
+  .gp-close .ico { width: 18px; height: 18px; }
+  .gp-def { font-size: 14.5px; line-height: 1.55; color: var(--body); }
+  .gp-ex { margin-top: 10px; font-size: 13.5px; line-height: 1.5; color: #063a52; background: var(--lav); padding: 9px 11px; border-radius: 10px; }
+  .gp-ex b { display: block; font-size: 11px; letter-spacing: 1px; text-transform: uppercase; color: var(--brand); margin-bottom: 2px; }
+  .gp-more { display: inline-block; margin-top: 10px; font-size: 13px; font-weight: 600; color: var(--brand-dark); text-decoration: none; }
+  .gp-more:hover { text-decoration: underline; }
+
+  /* ===== Glosario ===== */
+  .g-tools { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-bottom: 18px; }
+  .g-search { position: relative; flex: 1 1 280px; max-width: 420px; }
+  .g-search .ico { position: absolute; left: 13px; top: 50%; transform: translateY(-50%); color: var(--muted); width: 18px; height: 18px; }
+  .g-search input {
+    width: 100%; padding: 12px 14px 12px 40px; border: 2px solid var(--line); border-radius: 12px;
+    font: inherit; font-size: 15px; transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .g-search input:focus { outline: none; border-color: var(--brand); box-shadow: 0 0 0 4px rgba(8,98,136,0.15); }
+  .g-count { font-size: 14px; color: var(--muted); }
+  .g-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; }
+  .g-card { background: var(--surface-2); border: 1px solid var(--line); border-radius: 16px; padding: 16px 18px; scroll-margin-top: 90px; }
+  .g-card h3 { font-size: 16px; font-weight: 700; color: var(--ink); margin-bottom: 6px; }
+  .g-card p { font-size: 14px; line-height: 1.55; color: var(--body); }
+  .g-card .g-ex { margin-top: 8px; color: #063a52; font-size: 13.5px; }
+  .g-card.flash { animation: flash 1.6s ease-out; border-color: var(--brand); }
+  @keyframes flash { 0% { box-shadow: 0 0 0 0 rgba(8,98,136,0.55); } 100% { box-shadow: 0 0 0 16px rgba(8,98,136,0); } }
+  .g-empty { color: var(--muted); font-size: 15px; padding: 10px 0; }
+
+  /* ===== Pantallas medianas: la barra lateral se abre como menu ===== */
+  @media (max-width: 999px) {
+    .sidebar {
+      position: absolute; top: 0; bottom: 0; left: 0; z-index: 40; width: 280px; margin-left: 0 !important;
+      transform: translateX(-105%); background: #04263a; box-shadow: 20px 0 50px rgba(0,0,0,0.45);
+    }
+    body.side-open .sidebar { transform: none; }
+    .scrim { display: block; position: absolute; inset: 0; z-index: 30; background: rgba(4,38,58,0.6); }
+    .scrim[hidden] { display: none; }
+  }
+
+  /* ===== Movil ===== */
+  @media (max-width: 860px) {
+    .grid-3, .steps.four { grid-template-columns: repeat(2, 1fr); }
+    .pipeline { grid-template-columns: 1fr; }
+    .pipe-arrow { transform: rotate(90deg); height: 22px; }
+  }
+  @media (max-width: 760px) {
+    body { --side: 12px; }
+    .slide { margin: 12px 0; }
+    .nav-arrow, .tb-count { display: none; }
+    .mobile-nav {
+      display: flex; align-items: center; justify-content: space-between; gap: 10px;
+      padding: 8px 12px calc(8px + env(safe-area-inset-bottom));
+      background: rgba(4,38,58,0.92); border-top: 1px solid rgba(255,255,255,0.08);
+    }
+    .mn-btn {
+      display: inline-flex; align-items: center; gap: 4px; padding: 10px 14px; border-radius: 12px; cursor: pointer;
+      border: 1px solid rgba(255,255,255,0.18); background: rgba(255,255,255,0.08); color: #fff; font: inherit; font-weight: 600; font-size: 14px;
+    }
+    .mn-btn .ico { width: 18px; height: 18px; }
+    .mn-btn:disabled { opacity: 0.3; }
+    .mn-count { color: #cbd5e1; font-weight: 700; font-size: 14px; font-variant-numeric: tabular-nums; }
+  }
+  @media (max-width: 640px) {
+    .slide { padding: 26px 20px; border-radius: 20px; }
+    .hero { padding-bottom: 72px; }
+    .grid-2, .grid-3, .steps, .steps.four { grid-template-columns: 1fr; }
+    .meta, .closing .meta { grid-template-columns: 1fr; gap: 20px; }
+    .closing .meta { text-align: center; }
+    .tb-title { font-size: 14px; }
+    .tb-link .tb-text { display: none; }
+    .logo { width: 52px; height: 52px; }
+    .logo .ico { width: 24px; height: 24px; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
+  }
+
+  @media print {
+    html, body { height: auto; overflow: visible; display: block; background: #fff; }
+    .topbar, .sidebar, .scrim, .nav-arrow, .mobile-nav, .gloss-pop, .waves, .btn-app, .g-tools { display: none !important; }
+    .layout, .stage, .viewport { display: block; overflow: visible; }
+    .track { display: block; transform: none !important; }
+    .slide { width: auto; margin: 0 0 16px; overflow: visible; box-shadow: none; border: 1px solid var(--line); break-inside: avoid; }
+    .notes { display: none; }
+    .term { background: none; border-bottom: 1px dotted var(--muted); }
+  }
+</style>
+</head>
+<body class="preload">
+
+<!-- Iconos (estilo Lucide) -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-mic" viewBox="0 0 24 24"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></symbol>
+  <symbol id="i-arrow-left" viewBox="0 0 24 24"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></symbol>
+  <symbol id="i-arrow-right" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></symbol>
+  <symbol id="i-book" viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></symbol>
+  <symbol id="i-click" viewBox="0 0 24 24"><path d="M9 9 14 22 16 16 22 14z"/><path d="M7.2 2.2 8 5.1"/><path d="M5.1 8 2.2 7.2"/><path d="M14 4.1 12 6"/><path d="M6 12l-1.9 2"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></symbol>
+  <symbol id="i-dollar" viewBox="0 0 24 24"><line x1="12" x2="12" y1="2" y2="22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></symbol>
+  <symbol id="i-x-circle" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/></symbol>
+  <symbol id="i-audio" viewBox="0 0 24 24"><path d="M2 10v3"/><path d="M6 6v11"/><path d="M10 3v18"/><path d="M14 8v7"/><path d="M18 5v13"/><path d="M22 10v3"/></symbol>
+  <symbol id="i-image" viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="3" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.1-3.1a2 2 0 0 0-2.8 0L6 21"/></symbol>
+  <symbol id="i-share" viewBox="0 0 24 24"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" x2="12" y1="2" y2="15"/></symbol>
+  <symbol id="i-speaker" viewBox="0 0 24 24"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></symbol>
+  <symbol id="i-check-circle" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></symbol>
+  <symbol id="i-zap" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></symbol>
+  <symbol id="i-user-voice" viewBox="0 0 24 24"><circle cx="9" cy="8" r="4"/><path d="M2 21v-1a7 7 0 0 1 14 0v1"/><path d="M17 5.5a4 4 0 0 1 0 5"/><path d="M20 3a8 8 0 0 1 0 10"/></symbol>
+  <symbol id="i-play" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></symbol>
+  <symbol id="i-cpu" viewBox="0 0 24 24"><rect width="16" height="16" x="4" y="4" rx="2"/><rect width="6" height="6" x="9" y="9" rx="1"/><path d="M15 2v2"/><path d="M15 20v2"/><path d="M2 15h2"/><path d="M2 9h2"/><path d="M20 15h2"/><path d="M20 9h2"/><path d="M9 2v2"/><path d="M9 20v2"/></symbol>
+  <symbol id="i-monitor" viewBox="0 0 24 24"><rect width="20" height="14" x="2" y="3" rx="2"/><line x1="8" x2="16" y1="21" y2="21"/><line x1="12" x2="12" y1="17" y2="21"/></symbol>
+  <symbol id="i-activity" viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></symbol>
+  <symbol id="i-scale" viewBox="0 0 24 24"><path d="m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="m2 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="M7 21h10"/><path d="M12 3v18"/><path d="M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2"/></symbol>
+  <symbol id="i-file" viewBox="0 0 24 24"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M16 13H8"/><path d="M16 17H8"/><path d="M10 9H8"/></symbol>
+  <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></symbol>
+  <symbol id="i-shield" viewBox="0 0 24 24"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></symbol>
+  <symbol id="i-eye" viewBox="0 0 24 24"><path d="M2.06 12.35a1 1 0 0 1 0-.7 10.75 10.75 0 0 1 19.88 0 1 1 0 0 1 0 .7 10.75 10.75 0 0 1-19.88 0"/><circle cx="12" cy="12" r="3"/></symbol>
+  <symbol id="i-alert" viewBox="0 0 24 24"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/></symbol>
+  <symbol id="i-database" viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5V19A9 3 0 0 0 21 19V5"/><path d="M3 12A9 3 0 0 0 21 12"/></symbol>
+  <symbol id="i-layers" viewBox="0 0 24 24"><path d="M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z"/><path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65"/><path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65"/></symbol>
+  <symbol id="i-phone" viewBox="0 0 24 24"><rect width="14" height="20" x="5" y="2" rx="2"/><path d="M12 18h.01"/></symbol>
+  <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></symbol>
+  <symbol id="i-cards" viewBox="0 0 24 24"><rect width="14" height="14" x="8" y="8" rx="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></symbol>
+  <symbol id="i-sparkles" viewBox="0 0 24 24"><path d="M9.94 15.5A2 2 0 0 0 8.5 14.06l-6.14-1.58a.5.5 0 0 1 0-.96L8.5 9.94A2 2 0 0 0 9.94 8.5l1.58-6.14a.5.5 0 0 1 .96 0L14.06 8.5A2 2 0 0 0 15.5 9.94l6.14 1.58a.5.5 0 0 1 0 .96L15.5 14.06a2 2 0 0 0-1.44 1.44l-1.58 6.14a.5.5 0 0 1-.96 0z"/></symbol>
+  <symbol id="i-code" viewBox="0 0 24 24"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></symbol>
+  <symbol id="i-network" viewBox="0 0 24 24"><rect x="16" y="16" width="6" height="6" rx="1"/><rect x="2" y="16" width="6" height="6" rx="1"/><rect x="9" y="2" width="6" height="6" rx="1"/><path d="M5 16v-3a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v3"/><path d="M12 12V8"/></symbol>
+  <symbol id="i-rocket" viewBox="0 0 24 24"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/></symbol>
+  <symbol id="i-github" viewBox="0 0 24 24"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.4 5.4 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/><path d="M9 18c-4.51 2-5-2-7-2"/></symbol>
+  <symbol id="i-box" viewBox="0 0 24 24"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></symbol>
+  <symbol id="i-download" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></symbol>
+  <symbol id="i-chevron" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></symbol>
+  <symbol id="i-chevron-left" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></symbol>
+  <symbol id="i-chevron-down" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
+  <symbol id="i-sidebar" viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M9 3v18"/></symbol>
+  <symbol id="i-swipe" viewBox="0 0 24 24"><path d="M8 7 4 11l4 4"/><path d="m16 7 4 4-4 4"/><path d="M4 11h16"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></symbol>
+</svg>
+
+<div class="topbar">
+  <div class="topbar-inner">
+    <button type="button" class="tb-link" id="side-toggle" aria-controls="sidebar" aria-expanded="false" aria-label="Mostrar u ocultar la lista de diapositivas"><svg class="ico"><use href="#i-sidebar"/></svg></button>
+    <a class="tb-link" href="index.html"><svg class="ico"><use href="#i-arrow-left"/></svg><span class="tb-text">Volver a la app</span></a>
+    <div class="tb-title">PronunciaCoach TM · <span>Presentación</span></div>
+    <span class="tb-count" id="tb-count" aria-hidden="true">1 / 15</span>
+    <a class="tb-link" href="#glosario"><svg class="ico"><use href="#i-book"/></svg><span class="tb-text">Glosario</span></a>
+  </div>
+  <div class="progress" id="progress"></div>
+</div>
+
+<div class="layout">
+<aside class="sidebar" id="sidebar" aria-label="Lista de diapositivas">
+  <p class="side-head">DIAPOSITIVAS</p>
+  <ol class="side-list" id="side-list"></ol>
+  <div class="side-foot">
+    PronunciaCoach TM · Programación Avanzada 2026<br>Institución Universitaria Pascual Bravo<br>
+    <a href="index.html">Abrir la app →</a>
+  </div>
+</aside>
+<div class="scrim" id="scrim" hidden></div>
+
+<main class="stage" aria-roledescription="presentación" aria-label="Presentación PronunciaCoach TM">
+<div class="viewport" id="viewport">
+<button type="button" class="nav-arrow prev" id="prev" aria-label="Diapositiva anterior"><svg class="ico"><use href="#i-chevron-left"/></svg></button>
+<div class="track" id="track">
+
+<!-- 1 · Portada -->
+<header class="slide dark hero" id="s1" data-toc="Portada">
+  <div class="waves" aria-hidden="true"><span class="w2"></span><span class="w1"></span></div>
+  <div class="slide-head"><span class="slide-num">01 / 15</span><span class="kicker">PROGRAMACION AVANZADA 2026</span></div>
+  <div class="hero-brand">
+    <div class="logo" aria-hidden="true"><span class="logo-ring"></span><span class="logo-ring d2"></span><svg class="ico"><use href="#i-mic"/></svg></div>
+    <h1>PronunciaCoach <span class="tm-badge">TM</span></h1>
+  </div>
+  <p class="lead">Entrenador de pronunciacion en ingles con Google Teachable Machine Audio</p>
+  <div class="meta">
+    <div>
+      <span class="label">EQUIPO</span>
+      <ul><li>Jefferson Paredes</li><li>Jhon Deyby Piedrahita Higuita</li><li>Jorman Santiago Catano</li></ul>
+    </div>
+    <div>
+      <span class="label">INSTITUCION</span>
+      <p class="big">Pascual Bravo</p>
+      <p>Ingenieria de Software</p>
+    </div>
+  </div>
+  <p class="hint"><svg class="ico"><use href="#i-swipe"/></svg>Cambia de diapositiva con las flechas de los lados, el teclado (← →) o deslizando el dedo.</p>
+  <p class="hint" style="margin-top:8px"><svg class="ico"><use href="#i-click"/></svg>Haz clic en las palabras subrayadas para ver qué significan.</p>
+  <nav class="toc" id="toc" aria-label="Contenido de la presentación"></nav>
+  <details class="notes"><summary><svg class="ico"><use href="#i-chevron"/></svg>Notas para exponer</summary>
+    <p>Portada. Bienvenida: equipo y tema asignado (Google Teachable Machine). Mencionar que este MVP es PronunciaCoach TM, un entrenador de pronunciacion en ingles. Pasar rapido a problema.</p>
+  </details>
+</header>
+
+<!-- 2 · El problema -->
+<section class="slide" id="s2" data-toc="El problema">
+  <div class="slide-head"><span class="slide-num">02 / 15</span><span class="kicker">EL PROBLEMA</span></div>
+  <h2 class="slide-title">Practicar ingles sin saber si lo estas diciendo bien</h2>
+  <div class="grid-3">
+    <article class="card stat-card">
+      <svg class="ico"><use href="#i-clock"/></svg>
+      <div class="stat">6+ h</div>
+      <p class="stat-title">al dia frente al computador</p>
+      <p class="stat-sub">estudiando o teletrabajando</p>
+    </article>
+    <article class="card stat-card">
+      <svg class="ico"><use href="#i-dollar"/></svg>
+      <div class="stat">$40k</div>
+      <p class="stat-title">la hora de clase particular</p>
+      <p class="stat-sub">y solo cuando el profesor puede</p>
+    </article>
+    <article class="card stat-card">
+      <svg class="ico"><use href="#i-x-circle"/></svg>
+      <div class="stat">~0%</div>
+      <p class="stat-title">feedback util de Duolingo</p>
+      <p class="stat-sub">marca "bien" casi todo con reconocimiento generico</p>
+    </article>
+  </div>
+  <p class="callout"><svg class="ico"><use href="#i-audio"/></svg><span>Pares minimos ship/sheep, think/sink, very/berry son los mas problematicos para hispanohablantes</span></p>
+  <details class="notes"><summary><svg class="ico"><use href="#i-chevron"/></svg>Notas para exponer</summary>
+    <p>Problema. Hispanohablantes aprendiendo ingles no tienen retroalimentacion objetiva. Nombrar los pares minimos clasicos. El dolor es real: horas practicando sin saber si uno esta mejorando o reforzando errores.</p>
+  </details>
+</section>
+
+<!-- 3 · Tema asignado -->
+<section class="slide" id="s3" data-toc="Tema asignado">
+  <div class="slide-head"><span class="slide-num">03 / 15</span><span class="kicker">TEMA ASIGNADO</span></div>
+  <h2 class="slide-title">Google Teachable Machine</h2>
+  <p class="lead">Herramienta web gratuita de Google que entrena modelos de clasificacion de Imagen, Sonido o Pose directamente en el navegador, sin escribir codigo.</p>
+  <div class="grid-2 mt">
+    <article class="card">
+      <div class="icon-badge"><svg class="ico"><use href="#i-audio"/></svg></div>
+      <span class="label">NUESTRO PROYECTO</span>
+      <h3>Audio</h3>
+      <p>Clasifica clips de ~1 segundo con Short-Time Fourier Transform + la red Speech Commands de Google.</p>
+    </article>
+    <article class="card">
+      <div class="icon-badge grey"><svg class="ico"><use href="#i-image"/></svg></div>
+      <span class="label">ALTERNATIVAS NO ELEGIDAS</span>
+      <h3>Imagen y Pose</h3>
+      <p>Imagen clasifica fotos. Pose detecta posturas con PoseNet. Audio era el menos explorado y el que mejor cuadra con pronunciacion.</p>
+    </article>
+  </div>
+  <p class="callout"><svg class="ico"><use href="#i-share"/></svg><span>Exporta a TensorFlow.js, TF Lite o Keras - nosotros usamos TF.js para correr en el navegador</span></p>
+  <details class="notes"><summary><svg class="ico"><use href="#i-chevron"/></svg>Notas para exponer</summary>
+    <p>Que es TM. Google ofrece esta herramienta para democratizar machine learning. Elegimos Audio porque: 1) Es el menos usado en el curso, aporta originalidad. 2) Pronunciacion es un caso natural para clasificacion por espectrograma.</p>
+  </details>
+</section>
+
+<!-- 4 · Nuestra solucion -->
+<section class="slide" id="s4" data-toc="Nuestra solucion">
+  <div class="slide-head"><span class="slide-num">04 / 15</span><span class="kicker">NUESTRA SOLUCION</span></div>
+  <h2 class="slide-title">Una app web que te escucha<br>y te dice si lo dijiste bien</h2>
+  <p class="lead">Escuchas la pronunciacion nativa, la repites al microfono y recibes feedback inmediato. En Modo Personal, tu voz no sale de tu dispositivo.</p>
+  <ol class="steps">
+    <li class="step"><span class="step-n">1</span><svg class="ico"><use href="#i-speaker"/></svg><strong>Escucha</strong></li>
+    <li class="step"><span class="step-n">2</span><svg class="ico"><use href="#i-mic"/></svg><strong>Repite</strong></li>
+    <li class="step"><span class="step-n">3</span><svg class="ico"><use href="#i-check-circle"/></svg><strong>Feedback</strong></li>
+  </ol>
+  <details class="notes"><summary><svg class="ico"><use href="#i-chevron"/></svg>Notas para exponer</summary>
+    <p>Slide statement. Mostrar la propuesta de valor en una frase. Tres pasos: escuchar, repetir, recibir feedback. Transicion a los modos de operacion.</p>
+  </details>
+</section>
+
+<!-- 5 · Como funciona -->
+<section class="slide" id="s5" data-toc="Como funciona">
+  <div class="slide-head"><span class="slide-num">05 / 15</span><span class="kicker">COMO FUNCIONA</span></div>
+  <h2 class="slide-title">Dos motores de reconocimiento, un solo flujo</h2>
+  <div class="grid-2">
+    <article class="card">
+      <div class="engine-top"><div class="icon-badge green"><svg class="ico"><use href="#i-zap"/></svg></div><span class="label">RAPIDO</span></div>
+      <h3>Web Speech Recognition</h3>
+      <p>Motor nativo del navegador (Chrome usa Google por debajo). Sin descargas, cualquier palabra en ingles.</p>
+      <ul class="checks">
+        <li><svg class="ico"><use href="#i-check"/></svg>0 segundos de setup</li>
+        <li><svg class="ico"><use href="#i-check"/></svg>Vocabulario ilimitado</li>
+        <li><svg class="ico"><use href="#i-check"/></svg>Sin entrenamiento previo</li>
+      </ul>
+    </article>
+    <article class="card">
+      <div class="engine-top"><div class="icon-badge"><svg class="ico"><use href="#i-user-voice"/></svg></div><span class="label">PERSONAL</span></div>
+      <h3>Teachable Machine Audio</h3>
+      <p>Modelo propio entrenado en teachablemachine.withgoogle.com con pares minimos especificos del usuario.</p>
+      <ul class="checks">
+        <li><svg class="ico"><use href="#i-check"/></svg>Vocabulario a medida</li>
+        <li><svg class="ico"><use href="#i-check"/></svg>Entrena ship vs sheep con tu voz</li>
+        <li><svg class="ico"><use href="#i-check"/></svg>Tu voz no sale del dispositivo</li>
+      </ul>
+    </article>
+  </div>
+  <p class="callout"><svg class="ico"><use href="#i-play"/></svg><span>Tercer modo: Demo - simula predicciones para presentar sin micro ni red</span></p>
+  <details class="notes"><summary><svg class="ico"><use href="#i-chevron"/></svg>Notas para exponer</summary>
+    <p>Dos modos. Rapido = Web Speech Recognition (resiliente). Personal = TM Audio (lo que pide el curso). Incluimos ambos para resiliencia si falla la red o el micro.</p>
+  </details>
+</section>
+
+<!-- 6 · Arquitectura -->
+<section class="slide" id="s6" data-toc="Arquitectura">
+  <div class="slide-head"><span class="slide-num">06 / 15</span><span class="kicker">ARQUITECTURA</span></div>
+  <h2 class="slide-title">Todo corre en el navegador</h2>
+  <div class="pipeline">
+    <article class="card">
+      <div class="icon-badge"><svg class="ico"><use href="#i-mic"/></svg></div>
+      <span class="label">1. CAPTURA</span>
+      <h3>Microfono</h3>
+      <p>getUserMedia + Web Audio API toman ventanas de ~1s.</p>
+    </article>
+    <span class="pipe-arrow" aria-hidden="true"><svg class="ico"><use href="#i-arrow-right"/></svg></span>
+    <article class="card">
+      <div class="icon-badge"><svg class="ico"><use href="#i-activity"/></svg></div>
+      <span class="label">2. TRANSFORMACION</span>
+      <h3>STFT</h3>
+      <p>Short-Time Fourier Transform convierte audio en espectrograma.</p>
+    </article>
+    <span class="pipe-arrow" aria-hidden="true"><svg class="ico"><use href="#i-arrow-right"/></svg></span>
+    <article class="card">
+      <div class="icon-badge"><svg class="ico"><use href="#i-cpu"/></svg></div>
+      <span class="label">3. INFERENCIA</span>
+      <h3>Modelo TF.js</h3>
+      <p>Red neuronal corre en WebGL. Devuelve probabilidad por clase.</p>
+    </article>
+    <span class="pipe-arrow" aria-hidden="true"><svg class="ico"><use href="#i-arrow-right"/></svg></span>
+    <article class="card">
+      <div class="icon-badge green"><svg class="ico"><use href="#i-monitor"/></svg></div>
+      <span class="label">4. FEEDBACK</span>
+      <h3>UI + log</h3>
+      <p>Compara con objetivo, muestra resultado, guarda sesion.</p>
+    </article>
+  </div>
+  <div class="note-box"><svg class="ico"><use href="#i-book"/></svg><p><strong>Dictionary API en paralelo:</strong> por cada palabra, descarga el audio nativo (fuentes como Oxford) para que el usuario lo escuche primero. Si falla la red, fallback a TTS del navegador.</p></div>
+  <p class="callout"><svg class="ico"><use href="#i-shield"/></svg><span>Zero backend - en Modo Personal ni el audio ni los intentos salen del navegador</span></p>
+  <details class="notes"><summary><svg class="ico"><use href="#i-chevron"/></svg>Notas para exponer</summary>
+    <p>Arquitectura. Cuatro pasos, todo client-side. Explicar el flujo: captura -&gt; transformacion -&gt; inferencia -&gt; feedback. La Dictionary API es la unica dependencia externa de solo-lectura.</p>
+  </details>
+</section>
+
+<!-- 7 · Stack tecnico -->
+<section class="slide" id="s7" data-toc="Stack tecnico">
+  <div class="slide-head"><span class="slide-num">07 / 15</span><span class="kicker">STACK TECNICO</span></div>
+  <h2 class="slide-title">Herramientas y librerias</h2>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Componente</th><th>Tecnologia</th><th>Por que</th></tr></thead>
+      <tbody>
+        <tr><td>Entrenamiento</td><td>Teachable Machine Audio</td><td>Sin codigo, transfer learning rapido</td></tr>
+        <tr><td>Inferencia TM</td><td>TensorFlow.js 1.3.1 + speech-commands 0.4.0</td><td>Mismas versiones del codigo oficial de TM</td></tr>
+        <tr><td>Reconocimiento rapido</td><td>Web Speech Recognition API</td><td>Nativa del navegador, cero descargas</td></tr>
+        <tr><td>Audio nativo</td><td>Dictionary API + Web Speech Synthesis</td><td>Fetch de pronunciacion real + TTS respaldo</td></tr>
+        <tr><td>Interfaz</td><td>HTML + CSS + JavaScript vanilla</td><td>Un archivo, sin build, sin dependencias</td></tr>
+        <tr><td>Despliegue</td><td>GitHub Pages (static)</td><td>Gratis, SSL, un push lo publica</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="cost"><span>Costo total de infraestructura:</span><strong>$0 USD/mes</strong></div>
+  <details class="notes"><summary><svg class="ico"><use href="#i-chevron"/></svg>Notas para exponer</summary>
+    <p>Stack. No hay backend. Una sola pagina HTML con dependencias desde CDN. Costo marginal por usuario cero porque todo corre en el dispositivo.</p>
+  </details>
+</section>
+
+<!-- 8 · Demo en vivo -->
+<section class="slide dark" id="s8" data-toc="Demo en vivo">
+  <div class="slide-head"><span class="slide-num">08 / 15</span><span class="kicker">DEMO EN VIVO</span></div>
+  <h2 class="slide-title">PronunciaCoach TM</h2>
+  <p class="lead">Vamos a probar el reconocimiento en tiempo real con cuatro palabras:</p>
+  <div class="word-chips" aria-label="ship, sheep, think, sink"><span>ship</span><span>sheep</span><span>think</span><span>sink</span></div>
+  <ol class="steps four">
+    <li class="step"><span class="step-n">1</span><svg class="ico"><use href="#i-box"/></svg><strong>1. Cargar modelo</strong></li>
+    <li class="step"><span class="step-n">2</span><svg class="ico"><use href="#i-mic"/></svg><strong>2. Decir palabra</strong></li>
+    <li class="step"><span class="step-n">3</span><svg class="ico"><use href="#i-check-circle"/></svg><strong>3. Ver feedback</strong></li>
+    <li class="step"><span class="step-n">4</span><svg class="ico"><use href="#i-download"/></svg><strong>4. Exportar JSON</strong></li>
+  </ol>
+  <a class="btn-app" href="index.html"><svg class="ico"><use href="#i-play"/></svg>Abrir la app</a>
+  <details class="notes"><summary><svg class="ico"><use href="#i-chevron"/></svg>Notas para exponer</summary>
+    <p>DEMO EN VIVO. Cambiar a pestana con PronunciaCoach TM. Pasos: 1) Modo Personal, pegar URL del modelo. 2) Mostrar palabra + audio nativo. 3) Decir, mostrar feedback. 4) Probar varias, incluyendo una mal entrenada para mostrar que detecta confusion. 5) Exportar JSON.</p>
+  </details>
+</section>
+
+<!-- 9 · Privacidad y ley -->
+<section class="slide" id="s9" data-toc="Privacidad y ley">
+  <div class="slide-head"><span class="slide-num">09 / 15</span><span class="kicker">PRIVACIDAD Y LEY</span></div>
+  <h2 class="slide-title">Modo Personal: tu voz no sale del navegador</h2>
+  <div class="grid-3">
+    <article class="card">
+      <div class="icon-badge"><svg class="ico"><use href="#i-scale"/></svg></div>
+      <h3>Ley 1581 de 2012</h3>
+      <p>Habeas Data Colombia. La voz es dato biometrico = dato sensible (Art. 5). Requiere consentimiento expreso.</p>
+    </article>
+    <article class="card">
+      <div class="icon-badge"><svg class="ico"><use href="#i-file"/></svg></div>
+      <h3>Decreto 1377</h3>
+      <p>Reglamenta el consentimiento previo, expreso e informado. Nuestra app muestra aviso antes de activar micro.</p>
+    </article>
+    <article class="card">
+      <div class="icon-badge"><svg class="ico"><use href="#i-globe"/></svg></div>
+      <h3>GDPR Art. 9</h3>
+      <p>Biometria = categoria especial. En Modo Personal el procesamiento es local: nada se transmite.</p>
+    </article>
+  </div>
+  <article class="card mt">
+    <div class="engine-top"><div class="icon-badge green"><svg class="ico"><use href="#i-shield"/></svg></div><h3>Privacy by Design (Art. 25 GDPR)</h3></div>
+    <p>En Modo Personal el audio vive en Web Audio API dentro del navegador. Los reportes (JSON y PDF) solo contienen etiquetas y timestamps. Nunca audio.</p>
+  </article>
+  <p class="callout"><svg class="ico"><use href="#i-alert"/></svg><span>Modo Rapido si envia la voz a Google: la app lo avisa y pide consentimiento</span></p>
+  <details class="notes"><summary><svg class="ico"><use href="#i-chevron"/></svg>Notas para exponer</summary>
+    <p>Privacidad. Responde pregunta REQUERIDA sobre leyes colombianas. Privacy by Design es la arquitectura, no un parche. En Modo Personal el audio no viaja a ningun servidor (verificable en DevTools - Network). En Modo Rapido el navegador si envia la voz a Google; por eso la app muestra un aviso y pide consentimiento antes de activar el micro.</p>
+  </details>
+</section>
+
+<!-- 10 · Decision tecnica clave -->
+<section class="slide" id="s10" data-toc="Decision tecnica clave">
+  <div class="slide-head"><span class="slide-num">10 / 15</span><span class="kicker">DECISION TECNICA CLAVE</span></div>
+  <h2 class="slide-title">Por que dividir por "tomas" y no por cuadros al azar</h2>
+  <div class="grid-2 compare">
+    <article class="card bad">
+      <span class="verdict"><svg class="ico"><use href="#i-x"/></svg>MAL</span>
+      <h3>Frames al azar</h3>
+      <div class="split" aria-hidden="true"><i class="tr"></i><i class="te"></i><i class="tr"></i><i class="tr"></i><i class="te"></i><i class="tr"></i><i class="te"></i><i class="tr"></i><i class="tr"></i><i class="te"></i><i class="tr"></i><i class="tr"></i></div>
+      <div class="split-legend" aria-hidden="true"><span class="l-tr">train</span><span class="l-te">test</span><span>· una misma grabacion</span></div>
+      <p class="mt-s">Los segmentos consecutivos de una misma grabacion son casi identicos. Mezclar al azar entre train y validation hace que el modelo "vea en test" lo que ya aprendio.</p>
+      <p class="result">Resultado: metrica inflada que no generaliza.</p>
+    </article>
+    <article class="card good">
+      <span class="verdict"><svg class="ico"><use href="#i-check"/></svg>BIEN</span>
+      <h3>Tomas separadas</h3>
+      <div class="split takes" aria-hidden="true"><b><i class="tr"></i><i class="tr"></i><i class="tr"></i><i class="tr"></i></b><b><i class="tr"></i><i class="tr"></i><i class="tr"></i><i class="tr"></i></b><b><i class="te"></i><i class="te"></i><i class="te"></i><i class="te"></i></b></div>
+      <div class="split-legend" aria-hidden="true"><span class="l-tr">train</span><span class="l-te">test</span><span>· toma 1, toma 2, toma 3</span></div>
+      <p class="mt-s">Cada toma es una grabacion distinta: otra voz momentanea, otra posicion del mic, otro momento del dia. Train y test son genuinamente diferentes.</p>
+      <p class="result">Resultado: el modelo generaliza a condiciones reales.</p>
+    </article>
+  </div>
+  <p class="callout"><svg class="ico"><use href="#i-alert"/></svg><span>Data leakage temporal. Por eso en reconocimiento de voz tambien se divide por hablante, no por segmento. En video por escena, no por frame.</span></p>
+  <details class="notes"><summary><svg class="ico"><use href="#i-chevron"/></svg>Notas para exponer</summary>
+    <p>Decision tecnica. Pregunta OPCIONAL del docente - dominarla. Concepto clave: data leakage temporal. Aplicable a audio, video, sensores. Nuestra guia pide explicitamente 3 tomas separadas.</p>
+  </details>
+</section>
+
+<!-- 11 · Limitaciones honestas -->
+<section class="slide" id="s11" data-toc="Limitaciones honestas">
+  <div class="slide-head"><span class="slide-num">11 / 15</span><span class="kicker">LIMITACIONES HONESTAS</span></div>
+  <h2 class="slide-title">Lo que no hace y los riesgos</h2>
+  <div class="grid-2">
+    <article class="card">
+      <div class="engine-top"><div class="icon-badge warm"><svg class="ico"><use href="#i-alert"/></svg></div><h3>Limitaciones</h3></div>
+      <ul class="ilist warn">
+        <li><svg class="ico"><use href="#i-chevron"/></svg><span>Depende de la calidad y diversidad de las tomas</span></li>
+        <li><svg class="ico"><use href="#i-chevron"/></svg><span>No evalua "acento nativo", solo si produces distintivo</span></li>
+        <li><svg class="ico"><use href="#i-chevron"/></svg><span>Vocabulario limitado a palabras entrenadas (Modo Personal)</span></li>
+        <li><svg class="ico"><use href="#i-chevron"/></svg><span>Ruido alto reduce precision</span></li>
+        <li><svg class="ico"><use href="#i-chevron"/></svg><span>Algunos navegadores suspenden Web Audio sin foco</span></li>
+      </ul>
+    </article>
+    <article class="card">
+      <div class="engine-top"><div class="icon-badge"><svg class="ico"><use href="#i-shield"/></svg></div><h3>Riesgos y mitigacion</h3></div>
+      <ul class="ilist safe">
+        <li><svg class="ico"><use href="#i-chevron"/></svg><span>Pocos muestras → sesgo. <strong>Mitigacion:</strong> 30+ en 3 tomas</span></li>
+        <li><svg class="ico"><use href="#i-chevron"/></svg><span>Uso para vigilar empleados → violaria Ley 1581. <strong>Mitigacion:</strong> sin backend</span></li>
+        <li><svg class="ico"><use href="#i-chevron"/></svg><span>Falsos positivos desmotivan → debounce 1.5s y umbral de confianza 60%</span></li>
+        <li><svg class="ico"><use href="#i-chevron"/></svg><span>Dependencia de CDNs externos → fallbacks a Modo Demo</span></li>
+      </ul>
+    </article>
+  </div>
+  <p class="callout"><svg class="ico"><use href="#i-shield"/></svg><span>Es herramienta de practica personal, nunca de evaluacion oficial</span></p>
+  <details class="notes"><summary><svg class="ico"><use href="#i-chevron"/></svg>Notas para exponer</summary>
+    <p>Limitaciones. Reconocerlas muestra madurez. Vigilancia laboral es pregunta OPCIONAL del docente - responderla fuerte: diseno personal lo hace imposible porque no hay backend.</p>
+  </details>
+</section>
+
+<!-- 12 · Dificultades -->
+<section class="slide" id="s12" data-toc="Dificultades">
+  <div class="slide-head"><span class="slide-num">12 / 15</span><span class="kicker">DIFICULTADES</span></div>
+  <h2 class="slide-title">Lo que nos costo y como lo resolvimos</h2>
+  <div class="diff-head" aria-hidden="true"><span>DIFICULTADES</span><span></span><span>COMO LO RESOLVIMOS</span></div>
+  <div class="diff-list">
+    <div class="diff-row"><div class="diff-problem"><svg class="ico"><use href="#i-alert"/></svg><span>Alinear TF.js con el modelo exportado por TM</span></div><span class="diff-arrow" aria-hidden="true"><svg class="ico"><use href="#i-arrow-right"/></svg></span><div class="diff-fix"><svg class="ico"><use href="#i-check"/></svg><span>TF.js 1.3.1 + speech-commands 0.4.0, como en TM</span></div></div>
+    <div class="diff-row"><div class="diff-problem"><svg class="ico"><use href="#i-alert"/></svg><span>El microfono exige https o localhost</span></div><span class="diff-arrow" aria-hidden="true"><svg class="ico"><use href="#i-arrow-right"/></svg></span><div class="diff-fix"><svg class="ico"><use href="#i-check"/></svg><span>GitHub Pages (https) y servidor local para probar</span></div></div>
+    <div class="diff-row"><div class="diff-problem"><svg class="ico"><use href="#i-alert"/></svg><span>Palabras sin audio nativo en el diccionario</span></div><span class="diff-arrow" aria-hidden="true"><svg class="ico"><use href="#i-arrow-right"/></svg></span><div class="diff-fix"><svg class="ico"><use href="#i-check"/></svg><span>Fallback a la voz del navegador (TTS)</span></div></div>
+    <div class="diff-row"><div class="diff-problem"><svg class="ico"><use href="#i-alert"/></svg><span>Firefox no soporta Web Speech Recognition</span></div><span class="diff-arrow" aria-hidden="true"><svg class="ico"><use href="#i-arrow-right"/></svg></span><div class="diff-fix"><svg class="ico"><use href="#i-check"/></svg><span>Aviso claro y alternativa: Modo Personal o Demo</span></div></div>
+    <div class="diff-row"><div class="diff-problem"><svg class="ico"><use href="#i-alert"/></svg><span>Un mismo intento se contaba varias veces</span></div><span class="diff-arrow" aria-hidden="true"><svg class="ico"><use href="#i-arrow-right"/></svg></span><div class="diff-fix"><svg class="ico"><use href="#i-check"/></svg><span>Debounce de 1.5 s y umbral de confianza del 60%</span></div></div>
+  </div>
+  <p class="callout"><svg class="ico"><use href="#i-sparkles"/></svg><span>Leccion: probar temprano con microfono real, ruido real y el navegador de la demo</span></p>
+  <details class="notes"><summary><svg class="ico"><use href="#i-chevron"/></svg>Notas para exponer</summary>
+    <p>Dificultades. Contar 2 o 3 con ejemplos reales del equipo: que fallo, como lo notamos y como lo resolvimos. Ajustar esta lista a lo que de verdad nos paso durante el desarrollo.</p>
+  </details>
+</section>
+
+<!-- 13 · Mejoras futuras -->
+<section class="slide" id="s13" data-toc="Mejoras futuras">
+  <div class="slide-head"><span class="slide-num">13 / 15</span><span class="kicker">MEJORAS FUTURAS</span></div>
+  <h2 class="slide-title">Hacia donde puede crecer</h2>
+  <div class="grid-3 cards-inline">
+    <article class="card"><div class="icon-badge"><svg class="ico"><use href="#i-database"/></svg></div><h3>Persistencia</h3><p>Guardar historial en IndexedDB. Ver progreso semanal por palabra.</p></article>
+    <article class="card"><div class="icon-badge"><svg class="ico"><use href="#i-activity"/></svg></div><h3>Espectrograma visual</h3><p>Mostrar forma de onda del usuario vs la nativa, lado a lado.</p></article>
+    <article class="card"><div class="icon-badge"><svg class="ico"><use href="#i-layers"/></svg></div><h3>Baterias tematicas</h3><p>Vocales largas/cortas, fricativas, diptongos - packs predefinidos.</p></article>
+    <article class="card"><div class="icon-badge"><svg class="ico"><use href="#i-phone"/></svg></div><h3>PWA instalable</h3><p>Convertir en Progressive Web App con notificaciones.</p></article>
+    <article class="card"><div class="icon-badge"><svg class="ico"><use href="#i-refresh"/></svg></div><h3>Multi-fuente audio</h3><p>Failover entre Dictionary, Forvo, Merriam-Webster.</p></article>
+    <article class="card"><div class="icon-badge"><svg class="ico"><use href="#i-cards"/></svg></div><h3>Flashcards</h3><p>Integracion con Anki para practicar palabras del dia.</p></article>
+  </div>
+  <p class="callout"><svg class="ico"><use href="#i-rocket"/></svg><span>La arquitectura client-side permite escalar sin aumentar costos</span></p>
+  <details class="notes"><summary><svg class="ico"><use href="#i-chevron"/></svg>Notas para exponer</summary>
+    <p>Mejoras futuras. El proyecto tiene horizonte. Seis ideas priorizables. La mas valiosa academicamente seria el espectrograma visual.</p>
+  </details>
+</section>
+
+<!-- 14 · Lo que aprendimos -->
+<section class="slide" id="s14" data-toc="Lo que aprendimos">
+  <div class="slide-head"><span class="slide-num">14 / 15</span><span class="kicker">LO QUE APRENDIMOS</span></div>
+  <h2 class="slide-title">Conceptos aplicados</h2>
+  <div class="grid-auto cards-inline">
+    <article class="card"><div class="icon-badge"><svg class="ico"><use href="#i-sparkles"/></svg></div><h3>Machine Learning</h3><p>Transfer learning sobre Speech Commands, clasificacion por espectrograma, data leakage temporal.</p></article>
+    <article class="card"><div class="icon-badge"><svg class="ico"><use href="#i-audio"/></svg></div><h3>Audio digital</h3><p>Short-Time Fourier Transform, ventanas de 1s, ruido de fondo, umbrales de confianza.</p></article>
+    <article class="card"><div class="icon-badge"><svg class="ico"><use href="#i-code"/></svg></div><h3>Web Platform</h3><p>getUserMedia, Web Audio API, SpeechRecognition, SpeechSynthesis, fetch asincrono.</p></article>
+    <article class="card"><div class="icon-badge"><svg class="ico"><use href="#i-network"/></svg></div><h3>Arquitectura</h3><p>Serverless real, Privacy by Design, resiliencia con fallbacks en cascada, cero backend.</p></article>
+    <article class="card"><div class="icon-badge"><svg class="ico"><use href="#i-rocket"/></svg></div><h3>Producto</h3><p>MVP real, scope limitado, instrucciones de uso, despliegue en GitHub Pages, codigo abierto.</p></article>
+  </div>
+  <p class="quote">Programacion Avanzada: no se trata de lineas de codigo, se trata de decisiones</p>
+  <details class="notes"><summary><svg class="ico"><use href="#i-chevron"/></svg>Notas para exponer</summary>
+    <p>Aprendizajes. Cierre academico: cinco areas del curso aplicadas. La frase final conecta con los requisitos del docente.</p>
+  </details>
+</section>
+
+<!-- 15 · Gracias -->
+<section class="slide dark closing" id="s15" data-toc="Gracias">
+  <div class="waves" aria-hidden="true"><span class="w2"></span><span class="w1"></span></div>
+  <div class="slide-head"><span class="slide-num">15 / 15</span><span class="kicker">GRACIAS</span></div>
+  <h2 class="slide-title">Preguntas?</h2>
+  <div class="meta">
+    <div>
+      <span class="label">EQUIPO</span>
+      <ul><li>Jefferson Paredes</li><li>Jhon Deyby Piedrahita Higuita</li><li>Jorman Santiago Catano</li></ul>
+    </div>
+    <div>
+      <span class="label">PROYECTO</span>
+      <p class="big">PronunciaCoach TM</p>
+      <p>Codigo abierto en GitHub</p>
+      <a class="gh-link" href="https://github.com/jeffersonparedes353-netizen/pronunciacoach-tm" target="_blank" rel="noopener noreferrer"><svg class="ico"><use href="#i-github"/></svg>github.com/jeffersonparedes353-netizen/pronunciacoach-tm</a>
+    </div>
+  </div>
+  <p class="closing-foot">Programacion Avanzada 2026 - Pascual Bravo<br>Tema: Google Teachable Machine</p>
+  <details class="notes"><summary><svg class="ico"><use href="#i-chevron"/></svg>Notas para exponer</summary>
+    <p>Cierre Q&amp;A. Preparados para preguntas: leyes colombianas, privacidad, arquitectura, costo, tomas vs frames, datos del JSON, riesgos con pocas muestras, uso para vigilancia laboral. El guion-exposicion.md en el repo tiene todas las respuestas largas.</p>
+  </details>
+</section>
+
+<!-- Glosario -->
+<section class="slide" id="glosario" data-toc="Glosario">
+  <div class="slide-head"><span class="slide-num"><svg class="ico" style="width:14px;height:14px;vertical-align:-2px"><use href="#i-book"/></svg></span><span class="kicker">GLOSARIO</span></div>
+  <h2 class="slide-title">Términos clave</h2>
+  <div class="g-tools">
+    <label class="g-search"><svg class="ico"><use href="#i-search"/></svg><input type="search" id="g-input" placeholder="Buscar un término..." aria-label="Buscar en el glosario"></label>
+    <span class="g-count" id="g-count" aria-live="polite"></span>
+  </div>
+  <div class="g-grid" id="g-grid"></div>
+  <p class="g-empty" id="g-empty" hidden>No hay términos que coincidan con la búsqueda.</p>
+</section>
+
+</div><!-- /track -->
+<button type="button" class="nav-arrow next" id="next" aria-label="Diapositiva siguiente"><svg class="ico"><use href="#i-chevron"/></svg></button>
+<button type="button" class="more-hint" id="more-hint" hidden><svg class="ico"><use href="#i-chevron-down"/></svg>Más abajo</button>
+</div><!-- /viewport -->
+<nav class="mobile-nav" aria-label="Cambiar de diapositiva">
+  <button type="button" class="mn-btn" id="m-prev"><svg class="ico"><use href="#i-chevron-left"/></svg>Anterior</button>
+  <span class="mn-count" id="m-count">1 / 15</span>
+  <button type="button" class="mn-btn" id="m-next">Siguiente<svg class="ico"><use href="#i-chevron"/></svg></button>
+</nav>
+</main>
+</div><!-- /layout -->
+<p class="sr-only" id="announcer" aria-live="polite"></p>
+
+<!-- Tarjeta flotante con el significado -->
+<div class="gloss-pop" id="gloss-pop" role="dialog" aria-modal="false" aria-labelledby="gp-title" tabindex="-1" hidden>
+  <span class="gp-arrow" id="gp-arrow"></span>
+  <div class="gp-head">
+    <svg class="ico"><use href="#i-book"/></svg>
+    <strong id="gp-title"></strong>
+    <button type="button" class="gp-close" id="gp-close" aria-label="Cerrar"><svg class="ico"><use href="#i-x"/></svg></button>
+  </div>
+  <p class="gp-def" id="gp-def"></p>
+  <p class="gp-ex" id="gp-ex"></p>
+  <a class="gp-more" id="gp-more" href="#glosario">Ver en el glosario →</a>
+</div>
+
+<script>
+'use strict';
+
+// ============================================================
+// Glosario: t = titulo, m = como aparece en las diapositivas,
+// d = definicion, ex = relacion con el proyecto (opcional)
+// ============================================================
+const GLOSSARY = {
+  'teachable-machine': { t: 'Google Teachable Machine', m: ['Google Teachable Machine', 'Teachable Machine'],
+    d: 'Herramienta web gratuita de Google para entrenar modelos de inteligencia artificial sin programar: das ejemplos de cada clase, entrena en tu navegador y exporta el modelo.',
+    ex: 'Ahí se entrena el modelo del Modo Personal con la voz del usuario.' },
+  'tm-audio': { t: 'Teachable Machine Audio', m: ['Google Teachable Machine Audio', 'Teachable Machine Audio', 'TM Audio'],
+    d: 'Tipo de proyecto de Teachable Machine que clasifica sonidos o palabras cortas de ~1 segundo grabadas con el micrófono. Incluye una clase "Background Noise" para aprender a reconocer el silencio.',
+    ex: 'Cada palabra (ship, sheep...) es una clase del modelo.' },
+  'pares-minimos': { t: 'Pares mínimos', m: ['Pares minimos'],
+    d: 'Dos palabras que solo se diferencian en un sonido, como ship /ɪ/ y sheep /iː/. Son el ejercicio clásico para entrenar la pronunciación.',
+    ex: 'Son el núcleo del Modo Personal: el modelo aprende a distinguirlos con tu voz.' },
+  'reconocimiento-generico': { t: 'Reconocimiento de voz genérico', m: ['reconocimiento generico'],
+    d: 'Sistema entrenado para entender a cualquier persona, que además "adivina" la palabra más probable según el contexto. Por eso suele aceptar pronunciaciones imperfectas.' },
+  'clasificacion': { t: 'Clasificación', m: ['clasificacion'],
+    d: 'Tarea de machine learning que asigna cada entrada a una de varias categorías (clases).',
+    ex: 'Decidir si un audio es "ship", "sheep" o ruido de fondo.' },
+  'stft': { t: 'Short-Time Fourier Transform (STFT)', m: ['Short-Time Fourier Transform', 'STFT'],
+    d: 'Transformada de Fourier aplicada a trozos cortos de audio, uno tras otro. Indica qué frecuencias suenan en cada instante, y con eso se arma el espectrograma.' },
+  'espectrograma': { t: 'Espectrograma', m: ['espectrograma'],
+    d: 'Imagen del sonido: el eje horizontal es el tiempo, el vertical la frecuencia y el color la intensidad. Como es una imagen, se puede analizar con redes de visión (CNN).',
+    ex: 'Cada segundo de audio se convierte en un espectrograma de 43 × 232 valores.' },
+  'mobilenet': { t: 'MobileNet', m: ['MobileNet'],
+    d: 'Familia de redes neuronales convolucionales de Google, livianas y pensadas para imágenes en celulares y navegadores. Es la base de los proyectos de Imagen de Teachable Machine.',
+    ex: 'Ojo: los proyectos de Audio no usan MobileNet, sino el modelo Speech Commands de Google, una CNN entrenada con espectrogramas de palabras.' },
+  'posenet': { t: 'PoseNet', m: ['PoseNet'],
+    d: 'Modelo de Google que detecta 17 puntos del cuerpo (hombros, codos, rodillas...) en una imagen o video. Es la base de los proyectos de Pose de Teachable Machine.' },
+  'tfjs': { t: 'TensorFlow.js', m: ['TensorFlow.js', 'TF.js'],
+    d: 'Versión de TensorFlow para JavaScript. Carga y ejecuta modelos de IA directamente en el navegador, aprovechando la tarjeta gráfica con WebGL.',
+    ex: 'Ejecuta el modelo del Modo Personal sin ningún servidor.' },
+  'tflite': { t: 'TF Lite (TensorFlow Lite)', m: ['TF Lite'],
+    d: 'Versión liviana de TensorFlow para celulares y microcontroladores. Hoy se llama LiteRT.' },
+  'keras': { t: 'Keras', m: ['Keras'],
+    d: 'Librería de Python para construir redes neuronales capa por capa de forma sencilla. Viene integrada en TensorFlow.' },
+  'web-speech-recognition': { t: 'Web Speech Recognition API', m: ['Web Speech Recognition API', 'Web Speech Recognition', 'SpeechRecognition'],
+    d: 'API del navegador que convierte voz en texto. En Chrome el audio se envía a los servidores de Google para reconocerlo, así que necesita conexión a internet.',
+    ex: 'Es el motor del Modo Rápido.' },
+  'offline': { t: 'Offline', m: ['offline'], d: 'Sin conexión a internet.' },
+  'getusermedia': { t: 'getUserMedia', m: ['getUserMedia'],
+    d: 'Función del navegador que pide permiso para usar el micrófono o la cámara y entrega su señal en vivo (un "stream"). Solo funciona en páginas seguras (https o localhost).' },
+  'web-audio': { t: 'Web Audio API', m: ['Web Audio API', 'Web Audio'],
+    d: 'API del navegador para procesar audio en tiempo real: analizar frecuencias, medir volumen o aplicar efectos.',
+    ex: 'Alimenta el visualizador de voz de la app.' },
+  'inferencia': { t: 'Inferencia', m: ['inferencia'],
+    d: 'Usar un modelo ya entrenado para predecir con datos nuevos. Es rápida y se repite constantemente; el entrenamiento, en cambio, se hace una sola vez.',
+    ex: 'El modelo analiza tu voz más o menos cada medio segundo.' },
+  'red-neuronal': { t: 'Red neuronal', m: ['Red neuronal'],
+    d: 'Modelo matemático formado por capas de "neuronas" conectadas. Ajusta sus pesos con muchos ejemplos hasta aprender a reconocer patrones.' },
+  'webgl': { t: 'WebGL', m: ['WebGL'],
+    d: 'Tecnología que deja al navegador usar la tarjeta gráfica (GPU). TensorFlow.js la aprovecha para hacer los cálculos de la red mucho más rápido.' },
+  'probabilidad': { t: 'Probabilidad por clase', m: ['probabilidad por clase'],
+    d: 'El modelo no responde una sola palabra: da un porcentaje para cada clase (ship 82 %, sheep 15 %, ruido 3 %) y todos suman 100 %. Se calcula con la función softmax.' },
+  'dictionary-api': { t: 'Dictionary API', m: ['Dictionary API'],
+    d: 'Servicio gratuito (dictionaryapi.dev) que devuelve definición, transcripción fonética y audio de pronunciación de palabras en inglés.' },
+  'api': { t: 'API', m: ['API'],
+    d: 'Interfaz de programación de aplicaciones: el conjunto de funciones que un sistema ofrece para que otros programas lo usen.' },
+  'tts': { t: 'TTS / Web Speech Synthesis', m: ['Web Speech Synthesis', 'SpeechSynthesis', 'TTS'],
+    d: 'Text-to-Speech (texto a voz): el navegador lee un texto en voz alta con una voz sintética.',
+    ex: 'Es el plan B cuando no hay audio nativo de la palabra.' },
+  'fallback': { t: 'Fallback', m: ['fallbacks en cascada', 'fallbacks', 'fallback'],
+    d: 'Plan B automático: si algo falla, el sistema usa una alternativa. "En cascada" significa varios planes B en orden.',
+    ex: 'Sin audio nativo → voz del navegador; sin micrófono o modelo → Modo Demo.' },
+  'backend': { t: 'Backend / Zero backend', m: ['Zero backend', 'cero backend', 'sin backend', 'backend'],
+    d: 'El backend es la parte de un sistema que corre en un servidor (bases de datos, lógica, APIs propias). "Zero backend" significa que no hay servidor propio: todo corre en el navegador.' },
+  'transfer-learning': { t: 'Transfer learning', m: ['transfer learning'],
+    d: 'Reutilizar una red ya entrenada con muchísimos datos y reentrenar solo su parte final con tus ejemplos. Por eso bastan unas 30 muestras por palabra y un par de minutos.' },
+  'speech-commands': { t: 'Speech Commands (speech-commands)', m: ['Speech Commands', 'speech-commands'],
+    d: 'Librería y modelo de Google para reconocer palabras cortas en el navegador. Teachable Machine Audio parte de este modelo y lo adapta a tus palabras.' },
+  'vanilla': { t: 'JavaScript vanilla', m: ['JavaScript vanilla'],
+    d: 'JavaScript puro, sin frameworks como React o Angular.' },
+  'build': { t: 'Build', m: ['sin build'],
+    d: 'Paso de compilación o empaquetado que muchos proyectos necesitan antes de publicarse. "Sin build" significa que el archivo se publica tal cual.' },
+  'github-pages': { t: 'GitHub Pages', m: ['GitHub Pages'],
+    d: 'Servicio gratuito de GitHub que publica páginas web estáticas directamente desde un repositorio.' },
+  'static': { t: 'Sitio estático (static)', m: ['static'],
+    d: 'Página hecha solo de archivos HTML, CSS y JavaScript que se entregan tal cual, sin un servidor que procese nada.' },
+  'ssl': { t: 'SSL / HTTPS', m: ['SSL', 'https'],
+    d: 'Cifrado de la conexión entre el navegador y el servidor (el candado de la barra de direcciones). Además, el navegador exige https para dar acceso al micrófono.' },
+  'cdn': { t: 'CDN', m: ['CDNs', 'CDN'],
+    d: 'Red de servidores repartidos por el mundo que entrega archivos (como TensorFlow.js) desde el punto más cercano al usuario.' },
+  'json': { t: 'JSON', m: ['JSON'],
+    d: 'Formato de texto para guardar datos estructurados como pares clave-valor.',
+    ex: 'Es el reporte de sesión que exporta la app: intentos, aciertos y precisión, nunca audio.' },
+  'ley-1581': { t: 'Ley 1581 de 2012', m: ['Ley 1581 de 2012', 'Ley 1581'],
+    d: 'Ley colombiana de protección de datos personales (régimen general de Habeas Data). Exige autorización del titular para tratar sus datos y da reglas más estrictas para los datos sensibles.' },
+  'habeas-data': { t: 'Habeas Data', m: ['Habeas Data'],
+    d: 'Derecho a conocer, actualizar y rectificar la información que otros tienen sobre ti. Está en el artículo 15 de la Constitución colombiana.' },
+  'dato-biometrico': { t: 'Dato biométrico', m: ['dato biometrico'],
+    d: 'Dato físico o de comportamiento que identifica a una persona: huella, rostro, iris o voz.' },
+  'dato-sensible': { t: 'Dato sensible', m: ['dato sensible'],
+    d: 'Dato cuyo mal uso puede causar discriminación: salud, biometría, orientación sexual, entre otros. La Ley 1581 (art. 5) le da protección especial.' },
+  'decreto-1377': { t: 'Decreto 1377 de 2013', m: ['Decreto 1377'],
+    d: 'Reglamenta la Ley 1581: cómo pedir la autorización, los avisos de privacidad y las políticas de tratamiento de datos.' },
+  'consentimiento': { t: 'Consentimiento previo, expreso e informado', m: ['consentimiento previo, expreso e informado', 'consentimiento expreso'],
+    d: 'Autorización que la persona da antes de que se recojan sus datos (previo), de forma clara e inequívoca (expreso) y sabiendo para qué se usarán (informado).' },
+  'gdpr': { t: 'GDPR', m: ['GDPR'],
+    d: 'Reglamento General de Protección de Datos de la Unión Europea (2016/679). Aplica si la app tiene usuarios en la UE.' },
+  'categoria-especial': { t: 'Categoría especial de datos', m: ['categoria especial'],
+    d: 'En el GDPR (art. 9), datos con la máxima protección: salud, biometría, origen étnico y creencias, entre otros.' },
+  'privacy-by-design': { t: 'Privacy by Design', m: ['Privacy by Design'],
+    d: 'Privacidad desde el diseño (art. 25 del GDPR): proteger los datos desde la arquitectura del sistema, no como un parche posterior.' },
+  'timestamps': { t: 'Timestamp', m: ['timestamps'],
+    d: 'Marca de tiempo: la fecha y hora exactas en que ocurrió algo, por ejemplo cada intento.' },
+  'devtools': { t: 'DevTools', m: ['DevTools'],
+    d: 'Herramientas de desarrollador del navegador (tecla F12). La pestaña Network muestra cada petición que la página hace a internet.' },
+  'requests': { t: 'Request (petición)', m: ['requests'],
+    d: 'Cada vez que el navegador pide o envía datos a un servidor.' },
+  'frames': { t: 'Frame (cuadro)', m: ['cuadros', 'frames'],
+    d: 'Un pedacito de una grabación de audio o una imagen de un video. Una grabación se corta en muchos cuadros consecutivos.' },
+  'train-validation': { t: 'Train, validation y test', m: ['train y validation', 'train y test'],
+    d: 'Conjuntos de datos: con train (entrenamiento) el modelo aprende; validation y test son datos que nunca vio, para medir si de verdad aprendió.' },
+  'data-leakage': { t: 'Data leakage (fuga de datos)', m: ['Data leakage temporal', 'data leakage'],
+    d: 'Pasa cuando información de los datos de prueba se "cuela" en el entrenamiento y la precisión sale inflada. Es temporal cuando se debe a que trozos seguidos de una misma grabación son casi idénticos.' },
+  'metrica-inflada': { t: 'Métrica inflada', m: ['metrica inflada'],
+    d: 'Resultado que se ve mejor de lo que es en realidad, por evaluar con datos casi iguales a los de entrenamiento.' },
+  'generalizar': { t: 'Generalizar', m: ['generaliza'],
+    d: 'Que el modelo funcione bien con datos nuevos que nunca vio, no solo con los de entrenamiento.' },
+  'sesgo': { t: 'Sesgo', m: ['sesgo'],
+    d: 'Error sistemático del modelo por datos poco variados. Ejemplo: entrenado con una sola voz, falla con otras.' },
+  'debounce': { t: 'Debounce', m: ['debounce'],
+    d: 'Esperar un tiempo mínimo entre dos detecciones para no contar el mismo intento varias veces.',
+    ex: 'La app espera 1,5 segundos entre intentos.' },
+  'falsos-positivos': { t: 'Falso positivo', m: ['Falsos positivos'],
+    d: 'Cuando el sistema da algo por correcto (o detecta algo) sin que realmente lo sea.' },
+  'precision': { t: 'Precisión', m: ['precision'],
+    d: 'Porcentaje de aciertos sobre el total de intentos.' },
+  'indexeddb': { t: 'IndexedDB', m: ['IndexedDB'],
+    d: 'Base de datos incluida en el navegador para guardar información localmente, sin servidor.' },
+  'pwa': { t: 'PWA (Progressive Web App)', m: ['Progressive Web App', 'PWA'],
+    d: 'Página web que se puede instalar como una app en el celular o el computador, funcionar sin conexión y enviar notificaciones.' },
+  'fricativas': { t: 'Fricativas', m: ['fricativas'],
+    d: 'Consonantes que suenan por la fricción del aire: f, v, s, z, th, sh. Ejemplo: think /θ/ frente a sink /s/.' },
+  'diptongos': { t: 'Diptongos', m: ['diptongos'],
+    d: 'Dos sonidos vocálicos en una misma sílaba, como /aɪ/ en "right" u /oʊ/ en "go".' },
+  'vocales': { t: 'Vocales largas y cortas', m: ['Vocales largas/cortas'],
+    d: 'En inglés la duración y la tensión de la vocal cambian el significado: sheep /iː/ (larga) frente a ship /ɪ/ (corta).' },
+  'failover': { t: 'Failover', m: ['Failover'],
+    d: 'Cambio automático a un servicio alternativo cuando el principal falla.' },
+  'flashcards': { t: 'Flashcards', m: ['Flashcards'],
+    d: 'Tarjetas con una palabra o pregunta de un lado y la respuesta del otro, para memorizar.' },
+  'anki': { t: 'Anki', m: ['Anki'],
+    d: 'App gratuita de flashcards con repetición espaciada: te muestra cada tarjeta justo antes de que la olvides.' },
+  'client-side': { t: 'Client-side', m: ['client-side'],
+    d: 'Que corre en el dispositivo del usuario (su navegador), no en un servidor.' },
+  'mfcc': { t: 'MFCC', m: ['MFCC'],
+    d: 'Coeficientes cepstrales en la escala Mel: un resumen del espectro que imita cómo percibe el oído humano. Muy usado en el reconocimiento de voz clásico.',
+    ex: 'El modelo de Teachable Machine trabaja directamente con el espectrograma (FFT); no calcula MFCC.' },
+  'umbral': { t: 'Umbral de confianza', m: ['umbrales de confianza'],
+    d: 'Seguridad mínima que debe tener el modelo para aceptar una predicción. Si es más alto hay menos errores, pero detecta menos.',
+    ex: 'El Modo Personal solo acepta una palabra si el modelo está al menos 60 % seguro.' },
+  'fetch': { t: 'Fetch asíncrono', m: ['fetch asincrono'],
+    d: 'Petición a internet que no congela la página: el resto del código sigue funcionando mientras llega la respuesta.' },
+  'serverless': { t: 'Serverless', m: ['Serverless'],
+    d: 'Sin servidores propios que administrar. En este proyecto es literal: todo corre en el navegador del usuario.' },
+  'resiliencia': { t: 'Resiliencia', m: ['resiliencia'],
+    d: 'Capacidad de un sistema para seguir funcionando cuando algo falla, como la red, el micrófono o un CDN.' },
+  'mvp': { t: 'MVP', m: ['MVP'],
+    d: 'Producto mínimo viable: la versión más simple que ya resuelve el problema y se puede probar con usuarios reales.' },
+  'scope': { t: 'Scope (alcance)', m: ['scope'],
+    d: 'Lo que un proyecto incluye y lo que deja fuera a propósito.' },
+  'codigo-abierto': { t: 'Código abierto', m: ['codigo abierto'],
+    d: 'El código fuente es público: cualquiera puede verlo, usarlo y mejorarlo.',
+    ex: 'Este repositorio usa la licencia MIT.' },
+  'machine-learning': { t: 'Machine Learning', m: ['Machine Learning'],
+    d: 'Rama de la inteligencia artificial en la que el sistema aprende patrones a partir de ejemplos, en vez de seguir reglas escritas a mano.' },
+  'ventanas': { t: 'Ventana de audio', m: ['ventanas de ~1s', 'ventanas de 1s'],
+    d: 'Trozo de audio de duración fija que se analiza de una vez. Las ventanas se solapan para que cada palabra quede completa en al menos una.' },
+  'ui': { t: 'UI', m: ['UI'], d: 'Interfaz de usuario: lo que la persona ve y toca en pantalla.' },
+  'localhost': { t: 'localhost', m: ['localhost'],
+    d: 'Nombre de tu propio computador en la red. El navegador lo trata como un sitio seguro, así que permite usar el micrófono sin https.',
+    ex: 'Para la demo se puede servir la app con: python3 -m http.server 8000' },
+  'ruido-fondo': { t: 'Ruido de fondo (Background Noise)', m: ['ruido de fondo'],
+    d: 'Clase obligatoria en Teachable Machine Audio: unos segundos de ambiente sin hablar. Le enseña al modelo cuándo no estás diciendo ninguna palabra.' }
+};
+
+// ============================================================
+// Marcar los terminos dentro de cada diapositiva
+// (solo la primera aparicion de cada termino por diapositiva)
+// ============================================================
+const escapeRe = s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+const PATTERNS = [];
+Object.entries(GLOSSARY).forEach(([key, e]) => e.m.forEach(p => PATTERNS.push({
+  key, len: p.length,
+  re: new RegExp('(?<![\\p{L}\\p{N}])' + escapeRe(p) + '(?![\\p{L}\\p{N}])', 'iu')
+})));
+PATTERNS.sort((a, b) => b.len - a.len); // primero los terminos mas largos ("Web Audio API" antes que "API")
+
+const SKIP = '.term, .notes, .kicker, .slide-num, h1, a, button, script, style, svg, .word-chips, .split-legend';
+
+function markTerms(scope) {
+  const done = new Set();
+  PATTERNS.forEach(({ key, re }) => {
+    if (done.has(key)) return;
+    const walker = document.createTreeWalker(scope, NodeFilter.SHOW_TEXT, {
+      acceptNode: n => (n.parentElement && !n.parentElement.closest(SKIP))
+        ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT
+    });
+    let node;
+    while ((node = walker.nextNode())) {
+      const m = re.exec(node.nodeValue);
+      if (!m) continue;
+      const hit = node.splitText(m.index);
+      hit.splitText(m[0].length);
+      const span = document.createElement('span');
+      span.className = 'term';
+      span.textContent = hit.nodeValue;
+      span.dataset.key = key;
+      span.tabIndex = 0;
+      span.setAttribute('role', 'button');
+      span.setAttribute('aria-haspopup', 'dialog');
+      span.setAttribute('aria-expanded', 'false');
+      span.setAttribute('aria-controls', 'gloss-pop');
+      hit.replaceWith(span);
+      done.add(key);
+      break;
+    }
+  });
+}
+document.querySelectorAll('.slide:not(#glosario)').forEach(markTerms);
+
+// ============================================================
+// Tarjeta flotante con el significado (se abre con clic)
+// ============================================================
+const pop = document.getElementById('gloss-pop');
+const popArrow = document.getElementById('gp-arrow');
+let activeTerm = null;
+
+function openTerm(el, viaKeyboard) {
+  const g = GLOSSARY[el.dataset.key];
+  if (!g) return;
+  if (activeTerm) activeTerm.setAttribute('aria-expanded', 'false');
+  activeTerm = el;
+  el.setAttribute('aria-expanded', 'true');
+  document.getElementById('gp-title').textContent = g.t;
+  document.getElementById('gp-def').textContent = g.d;
+  const ex = document.getElementById('gp-ex');
+  ex.replaceChildren();
+  if (g.ex) {
+    const b = document.createElement('b'); b.textContent = 'En el proyecto';
+    ex.append(b, document.createTextNode(g.ex));
+    ex.hidden = false;
+  } else {
+    ex.hidden = true;
+  }
+  document.getElementById('gp-more').href = '#g-' + el.dataset.key;
+  pop.hidden = false;
+  positionPop();
+  if (viaKeyboard) pop.focus({ preventScroll: true });
+}
+
+function closePop(returnFocus) {
+  if (pop.hidden) return;
+  pop.hidden = true;
+  if (activeTerm) {
+    activeTerm.setAttribute('aria-expanded', 'false');
+    if (returnFocus) activeTerm.focus({ preventScroll: true });
+  }
+  activeTerm = null;
+}
+
+// La tarjeta es "fixed": se ubica con coordenadas de la ventana
+function positionPop() {
+  if (!activeTerm || pop.hidden) return;
+  const r = activeTerm.getClientRects()[0] || activeTerm.getBoundingClientRect();
+  if (r.bottom < 0 || r.top > window.innerHeight) { closePop(false); return; } // el termino salio de la vista
+  const vw = document.documentElement.clientWidth;
+  const pw = pop.offsetWidth, ph = pop.offsetHeight;
+  let left = r.left + r.width / 2 - pw / 2;
+  left = Math.max(12, Math.min(left, vw - pw - 12));
+  const below = (window.innerHeight - r.bottom) >= ph + 16 || r.top < ph + 80;
+  const top = below ? r.bottom + 10 : r.top - ph - 10;
+  pop.classList.toggle('above', !below);
+  pop.style.left = left + 'px';
+  pop.style.top = Math.max(8, top) + 'px';
+  popArrow.style.left = Math.max(14, Math.min(r.left + r.width / 2 - left - 7, pw - 28)) + 'px';
+}
+document.getElementById('gp-close').addEventListener('click', () => closePop(true));
+window.addEventListener('resize', positionPop);
+document.addEventListener('scroll', positionPop, true); // tambien cuando se desplaza dentro de una diapositiva
+
+// ============================================================
+// Glosario completo con buscador
+// ============================================================
+const norm = s => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+const gGrid = document.getElementById('g-grid');
+const gCards = Object.entries(GLOSSARY)
+  .sort((a, b) => a[1].t.localeCompare(b[1].t, 'es', { sensitivity: 'base' }))
+  .map(([key, g]) => {
+    const card = document.createElement('article');
+    card.className = 'g-card';
+    card.id = 'g-' + key;
+    const h = document.createElement('h3'); h.textContent = g.t;
+    const p = document.createElement('p'); p.textContent = g.d;
+    card.append(h, p);
+    if (g.ex) { const x = document.createElement('p'); x.className = 'g-ex'; x.textContent = g.ex; card.append(x); }
+    card.dataset.search = norm([g.t, g.d, g.ex || '', ...g.m].join(' '));
+    gGrid.append(card);
+    return card;
+  });
+
+function filterGlossary() {
+  const q = norm(document.getElementById('g-input').value.trim());
+  let shown = 0;
+  gCards.forEach(c => { const ok = !q || c.dataset.search.includes(q); c.hidden = !ok; if (ok) shown++; });
+  document.getElementById('g-count').textContent = `${shown} de ${gCards.length} términos`;
+  document.getElementById('g-empty').hidden = shown > 0;
+}
+document.getElementById('g-input').addEventListener('input', filterGlossary);
+filterGlossary();
+
+// ============================================================
+// Navegacion: una diapositiva a la vez, de lado a lado
+// ============================================================
+const track = document.getElementById('track');
+const viewport = document.getElementById('viewport');
+const slides = [...track.querySelectorAll('.slide')];
+const NUMBERED = slides.filter(s => s.id !== 'glosario').length;
+const ui = {
+  prev: document.getElementById('prev'), next: document.getElementById('next'),
+  mPrev: document.getElementById('m-prev'), mNext: document.getElementById('m-next'),
+  count: document.getElementById('tb-count'), mCount: document.getElementById('m-count'),
+  progress: document.getElementById('progress'), announcer: document.getElementById('announcer'),
+  sideList: document.getElementById('side-list')
+};
+const reduceMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+let current = -1;
+
+// Indice de la portada (chips)
+const toc = document.getElementById('toc');
+// Lista de la barra lateral
+const sideLinks = slides.map((s, i) => {
+  const isGloss = s.id === 'glosario';
+  const num = isGloss ? '★' : String(i + 1).padStart(2, '0');
+  s.setAttribute('role', 'group');
+  s.setAttribute('aria-roledescription', 'diapositiva');
+  s.setAttribute('aria-label', isGloss ? 'Glosario' : `${i + 1} de ${NUMBERED}: ${s.dataset.toc}`);
+
+  const li = document.createElement('li');
+  const a = document.createElement('a');
+  a.href = '#' + s.id;
+  const b = document.createElement('b'); b.textContent = num;
+  const t = document.createElement('span'); t.textContent = s.dataset.toc;
+  a.append(b, t); li.append(a); ui.sideList.append(li);
+
+  if (s.id !== 's1') {
+    const chip = document.createElement('a');
+    chip.href = '#' + s.id;
+    const cb = document.createElement('b'); cb.textContent = num;
+    chip.append(cb, document.createTextNode(s.dataset.toc));
+    toc.append(chip);
+  }
+  return a;
+});
+
+function goTo(i, { instant = false, keepScroll = false } = {}) {
+  i = Math.max(0, Math.min(slides.length - 1, i));
+  if (i === current && !instant) return;
+  closePop(false);
+  const s = slides[i];
+  if (!keepScroll) s.scrollTop = 0;
+  if (instant || reduceMotion()) track.style.transition = 'none';
+  track.style.transform = `translateX(${-100 * i}%)`;
+  if (instant || reduceMotion()) { void track.offsetWidth; track.style.transition = ''; }
+  // Solo la diapositiva visible recibe foco y lectores de pantalla
+  slides.forEach((el, k) => { el.inert = k !== i; });
+  sideLinks.forEach((a, k) => a.setAttribute('aria-current', k === i ? 'true' : 'false'));
+  const label = s.id === 'glosario' ? 'Glosario' : `${i + 1} / ${NUMBERED}`;
+  ui.count.textContent = label;
+  ui.mCount.textContent = label;
+  ui.prev.disabled = ui.mPrev.disabled = i === 0;
+  ui.next.disabled = ui.mNext.disabled = i === slides.length - 1;
+  ui.progress.style.width = (i / (slides.length - 1)) * 100 + '%';
+  if (current !== -1) ui.announcer.textContent = 'Diapositiva ' + s.getAttribute('aria-label');
+  current = i;
+  history.replaceState(null, '', '#' + s.id);
+  updateMoreHint();
+  // Mantener visible el elemento activo en la barra lateral
+  const link = sideLinks[i], list = ui.sideList;
+  const target = link.offsetTop - list.clientHeight / 2 + link.offsetHeight / 2;
+  list.scrollTo({ top: Math.max(0, target), behavior: instant || reduceMotion() ? 'auto' : 'smooth' });
+}
+
+// "Mas abajo": solo aparece si la diapositiva actual tiene contenido oculto
+const moreHint = document.getElementById('more-hint');
+function updateMoreHint() {
+  const s = slides[current];
+  if (!s) return;
+  moreHint.hidden = s.scrollHeight - s.scrollTop - s.clientHeight <= 12;
+}
+moreHint.addEventListener('click', () => {
+  const s = slides[current];
+  s.scrollBy({ top: s.clientHeight * 0.7, behavior: reduceMotion() ? 'auto' : 'smooth' });
+});
+slides.forEach(s => s.addEventListener('scroll', () => { if (s === slides[current]) updateMoreHint(); }, { passive: true }));
+document.addEventListener('toggle', updateMoreHint, true); // al abrir o cerrar "Notas para exponer"
+window.addEventListener('resize', updateMoreHint);
+
+function showGlossaryCard(key) {
+  const gi = slides.findIndex(s => s.id === 'glosario');
+  const card = document.getElementById('g-' + key);
+  if (!card) { goTo(gi); return; }
+  if (card.hidden) { document.getElementById('g-input').value = ''; filterGlossary(); }
+  goTo(gi, { keepScroll: true });
+  slides[gi].scrollTo({ top: Math.max(0, card.offsetTop - 24), behavior: reduceMotion() ? 'auto' : 'smooth' });
+  card.classList.remove('flash'); void card.offsetWidth; card.classList.add('flash');
+}
+
+function navigateToHash(hash) {
+  const id = (hash || '').replace(/^#/, '');
+  if (id.startsWith('g-')) { showGlossaryCard(id.slice(2)); return true; }
+  const i = slides.findIndex(s => s.id === id);
+  if (i >= 0) { goTo(i); return true; }
+  return false;
+}
+
+ui.prev.addEventListener('click', () => goTo(current - 1));
+ui.next.addEventListener('click', () => goTo(current + 1));
+ui.mPrev.addEventListener('click', () => goTo(current - 1));
+ui.mNext.addEventListener('click', () => goTo(current + 1));
+window.addEventListener('hashchange', () => navigateToHash(location.hash));
+
+// Deslizar con el dedo (no interfiere con el desplazamiento vertical ni con la tabla)
+let touch = null;
+viewport.addEventListener('touchstart', e => {
+  touch = (e.touches.length === 1 && !e.target.closest('.table-wrap'))
+    ? { x: e.touches[0].clientX, y: e.touches[0].clientY } : null;
+}, { passive: true });
+viewport.addEventListener('touchend', e => {
+  if (!touch) return;
+  const t = e.changedTouches[0];
+  const dx = t.clientX - touch.x, dy = t.clientY - touch.y;
+  touch = null;
+  if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.5) goTo(current + (dx < 0 ? 1 : -1));
+}, { passive: true });
+
+// ============================================================
+// Barra lateral: fija en pantallas grandes, menu en pantallas pequenas
+// ============================================================
+const sidebar = document.getElementById('sidebar');
+const scrim = document.getElementById('scrim');
+const sideToggle = document.getElementById('side-toggle');
+const drawerMQ = window.matchMedia('(max-width: 999px)');
+const isDrawer = () => drawerMQ.matches;
+function readSidePref() { try { return localStorage.getItem('pc-sidebar'); } catch (_) { return null; } }
+function setSidebar(open, remember) {
+  document.body.classList.toggle('side-open', open);
+  sideToggle.setAttribute('aria-expanded', String(open));
+  sidebar.inert = !open;
+  scrim.hidden = !(open && isDrawer());
+  if (remember && !isDrawer()) { try { localStorage.setItem('pc-sidebar', open ? '1' : '0'); } catch (_) {} }
+}
+sideToggle.addEventListener('click', () => setSidebar(!document.body.classList.contains('side-open'), true));
+scrim.addEventListener('click', () => setSidebar(false));
+drawerMQ.addEventListener('change', () => setSidebar(!isDrawer() && readSidePref() !== '0'));
+
+// ============================================================
+// Clics y teclado
+// ============================================================
+document.addEventListener('click', e => {
+  const link = e.target.closest('a[href^="#"]');
+  if (link) {
+    if (navigateToHash(link.getAttribute('href'))) {
+      e.preventDefault();
+      closePop(false);
+      if (isDrawer()) setSidebar(false);
+    }
+    return;
+  }
+  const term = e.target.closest('.term');
+  if (term) {
+    if (term === activeTerm) closePop(false); else openTerm(term, false);
+    return;
+  }
+  if (!e.target.closest('#gloss-pop')) closePop(false);
+});
+
+document.addEventListener('keydown', e => {
+  const term = e.target.closest && e.target.closest('.term');
+  if (term && (e.key === 'Enter' || e.key === ' ')) {
+    e.preventDefault();
+    if (term === activeTerm) closePop(true); else openTerm(term, true);
+    return;
+  }
+  if (e.key === 'Escape') {
+    if (!pop.hidden) closePop(true);
+    else if (isDrawer() && document.body.classList.contains('side-open')) setSidebar(false);
+    return;
+  }
+  if (e.altKey || e.metaKey || e.ctrlKey || (e.target.closest && e.target.closest('input, textarea, select'))) return;
+  // Flechas y AvPag/RePag (lo que envian los presentadores inalambricos)
+  if (e.key === 'ArrowRight' || e.key === 'PageDown') { e.preventDefault(); goTo(current + 1); }
+  else if (e.key === 'ArrowLeft' || e.key === 'PageUp') { e.preventDefault(); goTo(current - 1); }
+  else if (e.key === 'Home') { e.preventDefault(); goTo(0); }
+  else if (e.key === 'End') { e.preventDefault(); goTo(slides.length - 1); }
+});
+
+// ============================================================
+// Inicio
+// ============================================================
+setSidebar(!isDrawer() && readSidePref() !== '0');
+const startHash = location.hash;
+const startIndex = slides.findIndex(s => '#' + s.id === startHash);
+goTo(startIndex >= 0 ? startIndex : 0, { instant: true });
+if (startHash.startsWith('#g-')) showGlossaryCard(startHash.slice(3));
+requestAnimationFrame(() => requestAnimationFrame(() => document.body.classList.remove('preload')));
+</script>
+</body>
+</html>

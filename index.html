@@ -4,163 +4,353 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>PronunciaCoach TM - Entrenador de pronunciacion en ingles</title>
+<meta name="theme-color" content="#0b1026">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='6' fill='rgb(109,93,252)'/%3E%3Cg fill='none' stroke='white' stroke-width='2' stroke-linecap='round'%3E%3Crect x='9' y='4' width='6' height='10' rx='3'/%3E%3Cpath d='M18 11a6 6 0 0 1-12 0M12 17v3'/%3E%3C/g%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@1.3.1/dist/tf.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/speech-commands@0.4.0/dist/speech-commands.min.js"></script>
 <style>
+  :root {
+    --ink: #0b1026;
+    --ink-2: #1a1f4d;
+    --brand: #6d5dfc;
+    --brand-dark: #4c3fd1;
+    --violet: #8b5cf6;
+    --cyan: #22d3ee;
+    --ok: #10b981;
+    --bad: #ef4444;
+    --warn: #f59e0b;
+    --text: #1f2937;
+    --muted: #6b7280;
+    --line: #e7e8f2;
+    --surface: #ffffff;
+    --surface-2: #f6f7fc;
+  }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    background: linear-gradient(135deg, #0ea5e9 0%, #6366f1 100%);
+    font-family: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background:
+      radial-gradient(900px 500px at 0% -10%, rgba(109,93,252,0.55), transparent 60%),
+      radial-gradient(800px 500px at 100% 0%, rgba(34,211,238,0.30), transparent 60%),
+      radial-gradient(700px 400px at 50% 110%, rgba(139,92,246,0.35), transparent 60%),
+      var(--ink);
     min-height: 100vh;
-    padding: 20px;
-    color: #1f2937;
+    padding: 24px 16px;
+    color: var(--text);
   }
   .container {
     max-width: 1100px;
     margin: 0 auto;
-    background: white;
-    border-radius: 20px;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    background: var(--surface);
+    border-radius: 24px;
+    box-shadow: 0 30px 80px rgba(0,0,0,0.45), 0 0 0 1px rgba(255,255,255,0.06);
     overflow: hidden;
   }
-  header {
-    background: linear-gradient(135deg, #0369a1 0%, #4f46e5 100%);
-    color: white;
-    padding: 28px 32px;
+
+  /* ===== Encabezado con ondas de sonido ===== */
+  .hero {
+    position: relative; overflow: hidden; color: #fff;
+    background: linear-gradient(135deg, #0b1026 0%, #1e1b4b 55%, #312e81 100%);
+    padding: 32px 32px 64px;
   }
-  header h1 { font-size: 28px; margin-bottom: 6px; }
-  header p { opacity: 0.9; font-size: 14px; }
+  .hero-inner { position: relative; z-index: 1; display: flex; align-items: center; gap: 22px; }
+  .hero h1 { font-size: 32px; font-weight: 800; letter-spacing: -0.5px; line-height: 1.1; }
+  .tm-badge {
+    display: inline-block; vertical-align: middle; margin-left: 6px;
+    font-size: 12px; font-weight: 700; letter-spacing: 1px; padding: 3px 9px; border-radius: 999px;
+    background: linear-gradient(90deg, var(--cyan), var(--violet)); color: var(--ink);
+  }
+  .tagline {
+    margin-top: 8px; font-size: 13px; font-weight: 600; letter-spacing: 3px;
+    text-transform: uppercase; color: var(--cyan);
+  }
+  .hero-sub { margin-top: 6px; font-size: 14px; color: rgba(255,255,255,0.78); max-width: 560px; line-height: 1.45; }
+  .hero-link {
+    display: inline-flex; align-items: center; gap: 8px; margin-top: 12px; padding: 7px 14px; border-radius: 999px;
+    font-size: 13px; font-weight: 600; color: #cffafe; text-decoration: none;
+    background: rgba(34,211,238,0.12); border: 1px solid rgba(34,211,238,0.35); transition: background 0.2s;
+  }
+  .hero-link:hover { background: rgba(34,211,238,0.22); }
+  .hero-eq { margin-left: auto; height: 52px; gap: 5px; }
+  .hero-eq i { width: 6px; background: linear-gradient(to top, var(--cyan), var(--violet)); }
+
+  .logo {
+    position: relative; flex: 0 0 auto; width: 68px; height: 68px; border-radius: 50%;
+    display: grid; place-items: center;
+    background: linear-gradient(135deg, var(--cyan), var(--violet));
+    box-shadow: 0 10px 30px rgba(109,93,252,0.5);
+  }
+  .logo svg { width: 32px; height: 32px; color: #fff; position: relative; z-index: 1; }
+  .logo-ring {
+    position: absolute; inset: 0; border-radius: 50%;
+    border: 2px solid rgba(34,211,238,0.7); animation: ripple 2.4s ease-out infinite;
+  }
+  .logo-ring.d2 { animation-delay: 1.2s; }
+  @keyframes ripple { 0% { transform: scale(1); opacity: 0.9; } 100% { transform: scale(1.9); opacity: 0; } }
+
+  .hero-waves span { position: absolute; left: 0; right: 0; background-repeat: repeat-x; pointer-events: none; }
+  .hero-waves .w1 {
+    height: 60px; bottom: 6px; background-size: 240px 60px; animation: waveA 7s linear infinite;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='60'%3E%3Cpath d='M0 30 C 40 0, 80 0, 120 30 S 200 60, 240 30' fill='none' stroke='rgba(34,211,238,0.55)' stroke-width='2'/%3E%3C/svg%3E");
+  }
+  .hero-waves .w2 {
+    height: 90px; bottom: -14px; background-size: 360px 90px; animation: waveB 12s linear infinite;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='360' height='90'%3E%3Cpath d='M0 45 C 60 0, 120 0, 180 45 S 300 90, 360 45' fill='none' stroke='rgba(167,139,250,0.45)' stroke-width='2'/%3E%3C/svg%3E");
+  }
+  .hero-waves .w3 {
+    height: 40px; bottom: 22px; background-size: 180px 40px; animation: waveC 5s linear infinite;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='40'%3E%3Cpath d='M0 20 C 30 0, 60 0, 90 20 S 150 40, 180 20' fill='none' stroke='rgba(255,255,255,0.22)' stroke-width='1.5'/%3E%3C/svg%3E");
+  }
+  @keyframes waveA { to { background-position-x: -240px; } }
+  @keyframes waveB { to { background-position-x: 360px; } }
+  @keyframes waveC { to { background-position-x: -180px; } }
+
+  /* ===== Ecualizador reutilizable ===== */
+  .eq { display: inline-flex; align-items: center; gap: 3px; height: 22px; }
+  .eq i {
+    display: block; width: 4px; height: 100%; border-radius: 4px; background: currentColor;
+    transform: scaleY(0.3); animation: eq 1.1s ease-in-out infinite;
+  }
+  .eq i:nth-child(2) { animation-delay: -0.4s; animation-duration: 0.9s; }
+  .eq i:nth-child(3) { animation-delay: -0.8s; animation-duration: 1.3s; }
+  .eq i:nth-child(4) { animation-delay: -0.2s; animation-duration: 1.0s; }
+  .eq i:nth-child(5) { animation-delay: -0.6s; animation-duration: 1.2s; }
+  .eq i:nth-child(6) { animation-delay: -1.0s; animation-duration: 0.95s; }
+  .eq i:nth-child(7) { animation-delay: -0.3s; animation-duration: 1.15s; }
+  @keyframes eq { 0%, 100% { transform: scaleY(0.25); } 50% { transform: scaleY(1); } }
+  .eq-sm { height: 14px; gap: 2px; }
+  .eq-sm i { width: 3px; }
+  .eq-lg { height: 56px; gap: 6px; }
+  .eq-lg i { width: 8px; background: linear-gradient(to top, var(--cyan), var(--violet)); }
+
+  /* ===== Base ===== */
   .main { padding: 28px 32px; }
   section { margin-bottom: 24px; }
   h2 {
-    font-size: 18px; margin-bottom: 14px; color: #4f46e5;
-    border-bottom: 2px solid #e0e7ff; padding-bottom: 6px;
+    display: flex; align-items: center; flex-wrap: wrap; gap: 10px;
+    font-size: 19px; font-weight: 700; margin-bottom: 14px; color: var(--ink);
+    border-bottom: 2px solid var(--line); padding-bottom: 8px;
+  }
+  h2::before {
+    content: ''; width: 22px; height: 22px; flex: 0 0 auto;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='rgb(109,93,252)' stroke-width='2.2' stroke-linecap='round'%3E%3Cpath d='M2 10v3M6 6v11M10 3v18M14 8v7M18 5v13M22 10v3'/%3E%3C/svg%3E") center / contain no-repeat;
   }
   input[type="text"] {
-    width: 100%; padding: 12px 14px; border: 2px solid #e5e7eb;
-    border-radius: 10px; font-size: 14px; transition: border 0.2s;
+    width: 100%; padding: 12px 14px; border: 2px solid var(--line);
+    border-radius: 12px; font: inherit; font-size: 14px; transition: border 0.2s, box-shadow 0.2s;
   }
-  input[type="text"]:focus { outline: none; border-color: #4f46e5; }
+  input[type="text"]:focus { outline: none; border-color: var(--brand); box-shadow: 0 0 0 4px rgba(109,93,252,0.15); }
   .btn-row { display: flex; gap: 10px; margin-top: 10px; flex-wrap: wrap; }
   button {
-    padding: 12px 20px; border: none; border-radius: 10px; font-size: 14px;
-    font-weight: 600; cursor: pointer; transition: transform 0.1s, box-shadow 0.2s;
+    font-family: inherit; display: inline-flex; align-items: center; gap: 8px;
+    padding: 12px 20px; border: none; border-radius: 12px; font-size: 14px;
+    font-weight: 600; cursor: pointer; transition: transform 0.1s, box-shadow 0.2s, background 0.2s;
   }
-  button:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+  button:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(0,0,0,0.15); }
   button:disabled { opacity: 0.5; cursor: not-allowed; }
-  .btn-primary { background: #4f46e5; color: white; }
-  .btn-secondary { background: #e0e7ff; color: #4f46e5; }
-  .btn-danger { background: #ef4444; color: white; }
-  .btn-success { background: #10b981; color: white; }
-  .btn-outline { background: white; border: 2px solid #4f46e5; color: #4f46e5; }
-  .btn-play { background: #0ea5e9; color: white; padding: 10px 18px; }
+  button:focus-visible, a:focus-visible, .mode-card:focus-visible { outline: 3px solid var(--cyan); outline-offset: 2px; }
+  .btn-primary { background: linear-gradient(135deg, var(--brand), var(--violet)); color: #fff; }
+  .btn-secondary { background: #ecebff; color: var(--brand-dark); }
+  .btn-danger { background: var(--bad); color: #fff; }
+  .btn-success { background: var(--ok); color: #fff; }
+  .btn-outline { background: #fff; border: 2px solid var(--brand); color: var(--brand-dark); }
+  .btn-pause { background: var(--warn); color: #fff; }
+  .btn-play {
+    background: linear-gradient(135deg, #0ea5e9, var(--cyan)); color: #fff;
+    padding: 10px 20px; border-radius: 999px;
+  }
+  .btn-play svg { width: 18px; height: 18px; }
+  .btn-play .eq { display: none; }
+  .btn-play.playing .eq { display: inline-flex; }
+  .btn-play.playing .ico-speaker { display: none; }
+  .btn-play.playing { animation: playPulse 1.2s ease-out infinite; }
+  @keyframes playPulse {
+    0% { box-shadow: 0 0 0 0 rgba(34,211,238,0.55); }
+    100% { box-shadow: 0 0 0 16px rgba(34,211,238,0); }
+  }
+  a.btn-link {
+    display: inline-block; padding: 12px 20px; border-radius: 12px; font-size: 14px;
+    font-weight: 600; text-decoration: none; transition: transform 0.1s, box-shadow 0.2s;
+  }
+  a.btn-link:hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(0,0,0,0.15); }
   .hint {
-    background: #fef3c7; border-left: 4px solid #f59e0b;
-    padding: 12px 14px; border-radius: 6px; font-size: 13px; margin-top: 10px;
+    background: #fef3c7; border-left: 4px solid var(--warn);
+    padding: 12px 14px; border-radius: 10px; font-size: 13px; margin-top: 10px; line-height: 1.5;
   }
   .info-box {
-    background: #ede9fe; border-left: 4px solid #7c3aed;
-    padding: 12px 14px; border-radius: 6px; font-size: 13px; margin-top: 10px;
+    background: #efedff; border-left: 4px solid var(--brand);
+    padding: 12px 14px; border-radius: 10px; font-size: 13px; margin-top: 14px; line-height: 1.5;
   }
   .error-box {
-    background: #fee2e2; border-left: 4px solid #ef4444; color: #991b1b;
-    padding: 12px 14px; border-radius: 6px; font-size: 13px; margin-top: 10px;
+    background: #fee2e2; border-left: 4px solid var(--bad); color: #991b1b;
+    padding: 12px 14px; border-radius: 10px; font-size: 13px; margin-top: 10px;
   }
 
-  /* Mode selector */
+  /* ===== Selector de modo ===== */
   .mode-grid {
     display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
     gap: 14px; margin-top: 12px;
   }
   .mode-card {
-    border: 2px solid #e5e7eb; border-radius: 14px; padding: 18px;
-    cursor: pointer; transition: all 0.2s; background: #fafafa;
+    position: relative; width: 100%; text-align: left; font: inherit; color: inherit;
+    /* contenido arriba (los botones lo centran en vertical por defecto) */
+    display: flex; flex-direction: column; align-items: flex-start; justify-content: flex-start; gap: 0;
+    border: 2px solid var(--line); border-radius: 18px; padding: 20px;
+    cursor: pointer; background: var(--surface-2);
+    transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s, background 0.2s;
   }
-  .mode-card:hover { border-color: #4f46e5; background: #f5f3ff; transform: translateY(-2px); }
-  .mode-card.recommended { border-color: #10b981; background: #ecfdf5; }
+  .mode-card:hover:not(:disabled) { border-color: var(--brand); background: #fff; transform: translateY(-3px); box-shadow: 0 14px 30px rgba(109,93,252,0.18); }
+  .mode-card.recommended { border-color: var(--ok); background: #f0fdf8; }
   .mode-card.recommended::before {
-    content: 'RECOMENDADO'; display: inline-block; background: #10b981; color: white;
-    padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: 700; margin-bottom: 8px;
+    content: 'RECOMENDADO'; position: absolute; top: 18px; right: 16px;
+    background: var(--ok); color: #fff; padding: 3px 9px; border-radius: 999px;
+    font-size: 10px; font-weight: 700; letter-spacing: 0.5px;
   }
-  .mode-title { font-size: 16px; font-weight: 700; color: #1f2937; margin-bottom: 6px; }
-  .mode-desc { font-size: 13px; color: #6b7280; line-height: 1.4; }
+  .mode-icon {
+    width: 48px; height: 48px; border-radius: 14px; display: grid; place-items: center;
+    margin-bottom: 12px; color: #fff; transition: transform 0.2s;
+  }
+  .mode-icon svg { width: 24px; height: 24px; }
+  .mode-card:hover .mode-icon { transform: scale(1.08) rotate(-4deg); }
+  .mi-fast { background: linear-gradient(135deg, #10b981, var(--cyan)); }
+  .mi-personal { background: linear-gradient(135deg, var(--brand), var(--violet)); }
+  .mi-demo { background: linear-gradient(135deg, #f59e0b, #ec4899); }
+  .mode-title { display: block; font-size: 17px; font-weight: 700; color: var(--ink); margin-bottom: 6px; }
+  .mode-desc { display: block; font-size: 13px; color: var(--muted); line-height: 1.45; }
 
   #live-panel { display: none; }
 
-  /* Mic indicator */
+  /* ===== Microfono + visualizador de voz ===== */
   .mic-indicator {
-    display: flex; align-items: center; justify-content: center; gap: 14px;
-    padding: 18px; background: #0f172a; border-radius: 14px; margin-bottom: 20px; color: #e2e8f0;
+    display: flex; align-items: center; flex-wrap: wrap; gap: 16px; overflow: hidden;
+    padding: 16px 20px; background: linear-gradient(135deg, var(--ink), var(--ink-2));
+    border-radius: 18px; margin-bottom: 20px; color: #e2e8f0;
   }
-  .mic-dot {
-    width: 16px; height: 16px; border-radius: 50%; background: #475569; transition: background 0.1s;
+  .mic-orb {
+    --level: 0; position: relative; flex: 0 0 auto; width: 52px; height: 52px; border-radius: 50%;
+    display: grid; place-items: center; background: linear-gradient(135deg, var(--cyan), var(--violet));
+    transition: filter 0.3s, opacity 0.3s;
   }
-  .mic-dot.active { background: #22c55e; box-shadow: 0 0 20px #22c55e; animation: pulse 1.5s infinite; }
-  @keyframes pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.3); } }
-  .vol-bar { flex: 1; height: 10px; background: #334155; border-radius: 5px; overflow: hidden; }
-  .vol-bar-fill {
-    height: 100%; width: 0%;
-    background: linear-gradient(90deg, #22c55e, #eab308, #ef4444);
-    transition: width 0.1s;
+  .mic-orb svg { width: 24px; height: 24px; color: #fff; position: relative; z-index: 1; }
+  .orb-ring {
+    position: absolute; inset: 0; border-radius: 50%; background: rgba(34,211,238,0.35);
+    transform: scale(calc(1 + var(--level) * 0.35)); opacity: calc(var(--level) * 1.2);
+    transition: transform 80ms linear, opacity 80ms linear;
   }
+  .orb-ring.r2 { background: rgba(139,92,246,0.25); transform: scale(calc(1 + var(--level) * 0.6)); }
+  .mic-info { display: flex; flex-direction: column; min-width: 110px; }
+  .mic-info strong { font-size: 14px; }
+  #mic-status { font-size: 12px; color: #94a3b8; }
+  .voice-canvas { flex: 1 1 240px; min-width: 0; height: 64px; display: block; }
+  body.is-paused .mic-orb { filter: grayscale(1); opacity: 0.55; }
 
-  /* Practice panel */
+  /* ===== Panel de practica ===== */
   .practice-panel {
-    background: linear-gradient(135deg, #ede9fe, #ddd6fe);
-    padding: 24px; border-radius: 14px; margin-bottom: 20px; text-align: center;
+    position: relative; overflow: hidden; text-align: center;
+    background: linear-gradient(160deg, #f3f0ff 0%, #e9e5ff 50%, #e0f7fb 100%);
+    border: 1px solid #e4defe; padding: 24px 24px 26px; border-radius: 20px; margin-bottom: 20px;
   }
-  .target-label { font-size: 13px; color: #6d28d9; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
-  .target-word { font-size: 52px; font-weight: 800; color: #4c1d95; margin-bottom: 4px; letter-spacing: 2px; }
+  .practice-panel::after {
+    content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 60px; pointer-events: none;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='60'%3E%3Cpath d='M0 30 C 40 0, 80 0, 120 30 S 200 60, 240 30' fill='none' stroke='rgba(109,93,252,0.22)' stroke-width='2'/%3E%3C/svg%3E") repeat-x 0 100% / 240px 60px;
+    animation: waveA 14s linear infinite;
+  }
+  .practice-panel > * { position: relative; z-index: 1; }
+  .practice-panel.flash-ok { animation: flashOk 0.9s ease-out; }
+  .practice-panel.flash-bad { animation: flashBad 0.9s ease-out; }
+  @keyframes flashOk { 0% { box-shadow: 0 0 0 0 rgba(16,185,129,0.6); } 100% { box-shadow: 0 0 0 22px rgba(16,185,129,0); } }
+  @keyframes flashBad { 0% { box-shadow: 0 0 0 0 rgba(239,68,68,0.5); } 100% { box-shadow: 0 0 0 22px rgba(239,68,68,0); } }
+
+  .listen-badge {
+    display: inline-flex; align-items: center; gap: 8px; padding: 5px 12px; border-radius: 999px;
+    background: rgba(109,93,252,0.12); color: var(--brand-dark);
+    font-size: 12px; font-weight: 600; margin-bottom: 12px;
+  }
+  body.is-paused .listen-badge { background: rgba(245,158,11,0.15); color: #b45309; }
+  body.is-paused .listen-badge .eq i { animation-play-state: paused; }
+
+  .target-label { font-size: 13px; color: #6d28d9; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 6px; font-weight: 600; }
+  .target-word {
+    font-size: 56px; font-weight: 800; color: #3b1d8f; margin-bottom: 4px;
+    letter-spacing: 3px; line-height: 1.15; min-height: 64px;
+  }
+  .target-word .l {
+    display: inline-block; animation: letterIn 0.45s cubic-bezier(0.2, 0.8, 0.2, 1.2) backwards;
+    animation-delay: calc(var(--i) * 45ms);
+  }
+  .target-word .l > span { display: inline-block; transition: color 0.2s; }
+  .target-word.speaking .l > span {
+    color: var(--brand); animation: letterWave 0.5s ease-in-out infinite alternate;
+    animation-delay: calc(var(--i) * 80ms);
+  }
+  @keyframes letterIn { from { opacity: 0; transform: translateY(18px) scale(0.8); } }
+  @keyframes letterWave { from { transform: translateY(0); } to { transform: translateY(-8px); } }
   .target-phonetic { font-size: 22px; color: #6d28d9; font-family: 'Noto Sans', serif; margin-bottom: 8px; }
   .target-meaning { font-size: 13px; color: #6b21a8; font-style: italic; margin-bottom: 14px; max-width: 500px; margin-left: auto; margin-right: auto; }
   .target-tip { font-size: 12px; color: #7c3aed; margin-bottom: 14px; }
   .feedback {
     font-size: 16px; font-weight: 600; min-height: 48px;
-    padding: 12px; border-radius: 8px; margin-top: 10px;
+    padding: 12px; border-radius: 12px; margin-top: 12px;
   }
   .feedback.ok { background: #d1fae5; color: #065f46; }
   .feedback.bad { background: #fee2e2; color: #991b1b; }
-  .feedback.wait { background: #e0f2fe; color: #075985; }
+  .feedback.wait { background: rgba(255,255,255,0.7); color: #075985; }
+  .feedback.ok.animate { animation: pop 0.45s cubic-bezier(0.2, 0.8, 0.2, 1.3); }
+  .feedback.bad.animate { animation: shake 0.45s ease-in-out; }
+  @keyframes pop { 0% { transform: scale(0.9); } 100% { transform: scale(1); } }
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); } 20% { transform: translateX(-8px); }
+    40% { transform: translateX(8px); } 60% { transform: translateX(-5px); } 80% { transform: translateX(5px); }
+  }
 
   .word-list {
-    display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px; justify-content: center;
+    display: flex; gap: 6px; flex-wrap: wrap; margin-top: 14px; justify-content: center;
   }
   .word-chip {
-    padding: 4px 10px; background: rgba(255,255,255,0.7); border-radius: 12px;
-    font-size: 12px; color: #6d28d9; cursor: pointer; transition: all 0.2s;
+    padding: 5px 12px; background: rgba(255,255,255,0.75); border-radius: 999px;
+    font-size: 12px; font-weight: 500; color: #6d28d9; cursor: pointer; transition: all 0.2s;
   }
-  .word-chip:hover { background: white; }
-  .word-chip.current { background: #7c3aed; color: white; font-weight: 600; }
-  .word-chip.correct { background: #10b981; color: white; }
-  .word-chip.wrong { background: #ef4444; color: white; }
+  .word-chip:hover { background: #fff; transform: translateY(-1px); }
+  .word-chip.current { background: var(--brand); color: #fff; font-weight: 600; }
+  .word-chip.correct { background: var(--ok); color: #fff; }
+  .word-chip.wrong { background: var(--bad); color: #fff; }
 
-  /* Predictions */
-  .predictions-list { display: flex; flex-direction: column; gap: 6px; margin-top: 16px; max-height: 240px; overflow-y: auto; }
+  /* ===== Probabilidades ===== */
+  .predictions-list { display: flex; flex-direction: column; gap: 8px; margin-top: 16px; max-height: 240px; overflow-y: auto; }
   .pred-row {
     display: grid; grid-template-columns: 110px 1fr 46px; gap: 10px; align-items: center;
   }
   .pred-label { font-size: 13px; font-weight: 600; text-transform: lowercase; }
-  .pred-bar-bg { background: #f3f4f6; height: 20px; border-radius: 10px; overflow: hidden; }
+  .pred-bar-bg { background: #f1f2f8; height: 20px; border-radius: 10px; overflow: hidden; }
   .pred-bar-fill {
-    height: 100%; background: linear-gradient(90deg, #a5b4fc, #4f46e5);
+    height: 100%; background: linear-gradient(90deg, var(--cyan), var(--brand));
     transition: width 0.25s ease; border-radius: 10px;
   }
-  .pred-row.winner .pred-bar-fill { background: linear-gradient(90deg, #86efac, #10b981); }
-  .pred-val { font-size: 12px; text-align: right; font-variant-numeric: tabular-nums; color: #6b7280; }
+  .pred-row.winner .pred-bar-fill { background: linear-gradient(90deg, #86efac, var(--ok)); }
+  .pred-val { font-size: 12px; text-align: right; font-variant-numeric: tabular-nums; color: var(--muted); }
 
-  /* Stats */
+  /* ===== Estadisticas ===== */
   .stats-grid {
     display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
     gap: 10px; margin-top: 16px;
   }
-  .stat-card { background: #f9fafb; padding: 12px 14px; border-radius: 10px; border: 1px solid #e5e7eb; }
-  .stat-label { font-size: 11px; text-transform: uppercase; color: #6b7280; letter-spacing: 0.5px; }
-  .stat-value { font-size: 22px; font-weight: 700; color: #1f2937; margin-top: 2px; }
+  .stat-card {
+    position: relative; overflow: hidden; background: var(--surface-2);
+    padding: 14px 16px 14px 20px; border-radius: 14px; border: 1px solid var(--line);
+  }
+  .stat-card::before {
+    content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px;
+    background: linear-gradient(to bottom, var(--cyan), var(--violet));
+  }
+  .stat-label { font-size: 11px; text-transform: uppercase; color: var(--muted); letter-spacing: 0.8px; font-weight: 600; }
+  .stat-value { font-size: 24px; font-weight: 800; color: var(--ink); margin-top: 2px; font-variant-numeric: tabular-nums; }
 
   #session-log {
-    max-height: 160px; overflow-y: auto; background: #0f172a; color: #cbd5e1;
-    padding: 10px 12px; border-radius: 8px; font-family: 'SF Mono', Monaco, monospace;
-    font-size: 11px; margin-top: 10px;
+    max-height: 160px; overflow-y: auto; background: var(--ink); color: #cbd5e1;
+    padding: 10px 12px; border-radius: 12px; font-family: 'SF Mono', Monaco, monospace;
+    font-size: 11px; margin-top: 12px;
   }
   .log-entry { padding: 2px 0; }
   .log-entry.ok { color: #86efac; }
@@ -168,48 +358,156 @@
   .log-ts { color: #64748b; }
 
   .status-pill {
-    display: inline-block; padding: 4px 10px; border-radius: 12px;
-    font-size: 12px; font-weight: 600; margin-left: 10px;
+    display: inline-block; padding: 4px 10px; border-radius: 999px;
+    font-size: 12px; font-weight: 600; margin-left: 4px;
   }
   .status-ok { background: #d1fae5; color: #065f46; }
   .status-warn { background: #fed7aa; color: #9a3412; }
   .status-off { background: #e5e7eb; color: #4b5563; }
 
   footer {
-    padding: 16px 32px; background: #f9fafb; font-size: 12px;
-    color: #6b7280; text-align: center; border-top: 1px solid #e5e7eb;
+    position: relative; padding: 30px 32px 18px; background: var(--surface-2); font-size: 12px;
+    color: var(--muted); text-align: center; border-top: 1px solid var(--line); line-height: 1.7;
+  }
+  footer::before {
+    content: ''; position: absolute; top: 8px; left: 50%; width: 120px; height: 14px; transform: translateX(-50%);
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='14'%3E%3Cpath d='M0 7 C 10 0, 20 0, 30 7 S 50 14, 60 7 S 80 0, 90 7 S 110 14, 120 7' fill='none' stroke='rgb(109,93,252)' stroke-width='1.5'/%3E%3C/svg%3E") center / 120px 14px no-repeat;
+    opacity: 0.7;
   }
 
   .loader {
     display: inline-block; width: 16px; height: 16px; border: 2px solid #e0e7ff;
-    border-top-color: #4f46e5; border-radius: 50%; animation: spin 0.6s linear infinite;
+    border-top-color: var(--brand); border-radius: 50%; animation: spin 0.6s linear infinite;
     vertical-align: middle; margin-right: 6px;
   }
   @keyframes spin { to { transform: rotate(360deg); } }
 
-  /* Overlay de carga */
+  /* ===== Overlay de carga ===== */
   #loading-overlay {
-    display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.85);
-    z-index: 9999; align-items: center; justify-content: center;
+    display: none; position: fixed; inset: 0; background: rgba(11,16,38,0.85);
+    backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
+    z-index: 9999; align-items: center; justify-content: center; padding: 16px;
   }
   #loading-overlay.show { display: flex; }
   .loading-card {
-    background: white; padding: 32px; border-radius: 16px;
+    background: #fff; padding: 32px; border-radius: 20px;
     text-align: center; max-width: 420px; box-shadow: 0 20px 60px rgba(0,0,0,0.4);
   }
-  .loading-spinner {
-    width: 48px; height: 48px; border: 4px solid #e0e7ff;
-    border-top-color: #4f46e5; border-radius: 50%;
-    animation: spin 0.8s linear infinite; margin: 0 auto 16px;
+  .loading-card .eq-lg { margin-bottom: 18px; }
+  .loading-title { font-size: 18px; font-weight: 700; color: var(--ink); margin-bottom: 6px; }
+  .loading-sub { font-size: 13px; color: var(--muted); }
+
+  /* ===== Movil ===== */
+  @media (max-width: 640px) {
+    .hero { padding: 24px 20px 56px; }
+    .hero-inner { gap: 14px; align-items: flex-start; }
+    .hero h1 { font-size: 25px; }
+    .hero-eq { display: none; }
+    .logo { width: 46px; height: 46px; margin-top: 2px; }
+    .logo svg { width: 22px; height: 22px; }
+    .main { padding: 22px 18px; }
+    .target-word { font-size: 40px; min-height: 48px; }
+    .pred-row { grid-template-columns: 80px 1fr 40px; }
+    .voice-canvas { flex-basis: 100%; }
   }
-  .loading-title { font-size: 18px; font-weight: 700; color: #1f2937; margin-bottom: 6px; }
-  .loading-sub { font-size: 13px; color: #6b7280; }
+
+  /* ===== Dialogo al terminar sesion ===== */
+  .end-dialog {
+    border: none; border-radius: 22px; padding: 28px; margin: auto;
+    width: min(480px, calc(100vw - 32px)); color: var(--text); font-family: inherit;
+    box-shadow: 0 30px 80px rgba(0,0,0,0.45);
+  }
+  .end-dialog::backdrop { background: rgba(11,16,38,0.72); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); }
+  .end-dialog[open] { animation: dialogIn 0.25s ease-out; }
+  @keyframes dialogIn { from { opacity: 0; transform: translateY(12px) scale(0.97); } }
+  .end-icon {
+    width: 52px; height: 52px; border-radius: 16px; display: grid; place-items: center; color: #fff;
+    background: linear-gradient(135deg, var(--cyan), var(--violet)); margin-bottom: 14px;
+  }
+  .end-dialog h3 { font-size: 21px; font-weight: 800; color: var(--ink); margin-bottom: 6px; }
+  .end-summary { font-size: 14px; color: var(--muted); line-height: 1.5; }
+  .end-grade {
+    display: flex; align-items: baseline; flex-wrap: wrap; gap: 8px; margin-top: 14px;
+    padding: 12px 16px; border-radius: 14px; background: #f3f0ff; border: 1px solid #e4defe;
+  }
+  .end-grade-cap { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-right: 4px; }
+  .end-grade-num { font-size: 34px; font-weight: 800; line-height: 1; }
+  .end-grade-rest { font-size: 14px; font-weight: 600; color: var(--muted); }
+  .end-question { font-size: 14px; font-weight: 600; color: var(--ink); margin: 18px 0 10px; }
+  .end-option {
+    display: flex; gap: 12px; align-items: flex-start; padding: 12px 14px; margin-bottom: 8px;
+    border: 2px solid var(--line); border-radius: 14px; cursor: pointer; transition: border-color 0.2s, background 0.2s;
+  }
+  .end-option:has(input:checked) { border-color: var(--brand); background: #f5f3ff; }
+  .end-option input { margin-top: 2px; width: 18px; height: 18px; accent-color: var(--brand); flex: 0 0 auto; }
+  .end-option strong { display: block; font-size: 14px; color: var(--ink); }
+  .end-option small { display: block; font-size: 12px; color: var(--muted); margin-top: 2px; line-height: 1.4; }
+  .end-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 20px; justify-content: flex-end; }
+  .consent-list { list-style: none; margin-top: 14px; display: grid; gap: 8px; }
+  .consent-list li {
+    position: relative; padding: 10px 12px 10px 36px; border-radius: 12px; font-size: 13.5px; line-height: 1.5;
+    background: var(--surface-2); border: 1px solid var(--line); color: var(--text);
+  }
+  .consent-list li::before {
+    content: ''; position: absolute; left: 12px; top: 13px; width: 14px; height: 14px; border-radius: 50%;
+    background: var(--ok);
+  }
+  .consent-list li.warn { background: #fffbeb; border-color: #fde68a; }
+  .consent-list li.warn::before { background: var(--warn); }
+  .consent-legal { margin-top: 12px; font-size: 12px; line-height: 1.5; color: var(--muted); }
+
+  /* Respeta a quien prefiere menos movimiento */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important; animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
 </style>
 </head>
 <body>
+<dialog id="consent-dialog" class="end-dialog" aria-labelledby="consent-title">
+  <div class="end-icon" aria-hidden="true">
+    <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg>
+  </div>
+  <h3 id="consent-title">Antes de activar el microfono</h3>
+  <p class="end-summary">PronunciaCoach TM necesita tu microfono para escuchar tu pronunciacion. Esto es lo que pasa con tu voz en este modo:</p>
+  <ul class="consent-list" id="consent-list"></ul>
+  <p class="consent-legal">Finalidad: practica personal de pronunciacion. Tratamiento conforme a la Ley 1581 de 2012 y el Decreto 1377 de 2013 (Habeas Data). Puedes retirar el permiso cuando quieras terminando la sesion o bloqueando el microfono en el navegador.</p>
+  <div class="end-actions">
+    <button class="btn-secondary" autofocus onclick="resolveConsent(false)">Cancelar</button>
+    <button class="btn-primary" onclick="resolveConsent(true)">Acepto y activar microfono</button>
+  </div>
+</dialog>
+
+<dialog id="end-dialog" class="end-dialog" aria-labelledby="end-title">
+  <div class="end-icon" aria-hidden="true"><span class="eq"><i></i><i></i><i></i><i></i><i></i></span></div>
+  <h3 id="end-title">Terminar la sesion?</h3>
+  <p class="end-summary" id="end-summary"></p>
+  <div class="end-grade" id="end-grade"></div>
+  <div id="end-downloads">
+    <p class="end-question" id="end-question"></p>
+    <div id="end-options">
+      <label class="end-option">
+        <input type="checkbox" id="opt-pdf">
+        <span><strong>Calificacion en PDF</strong><small>Nota de 0 a 5, resultado por palabra, confusiones y recomendaciones.</small></span>
+      </label>
+      <label class="end-option">
+        <input type="checkbox" id="opt-json">
+        <span><strong>Reporte JSON</strong><small>Todos los intentos con su confianza, para analizar los datos.</small></span>
+      </label>
+    </div>
+  </div>
+  <div class="end-actions">
+    <button class="btn-secondary" autofocus onclick="closeEndDialog()">Seguir practicando</button>
+    <button class="btn-outline" id="end-exit-btn" onclick="finishSession(false)">Salir sin descargar</button>
+    <button class="btn-primary" id="end-download-btn" onclick="finishSession(true)">Descargar y salir</button>
+  </div>
+</dialog>
+
 <div id="loading-overlay">
   <div class="loading-card">
-    <div class="loading-spinner"></div>
+    <div class="eq eq-lg" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
     <div class="loading-title" id="loading-title">Cargando...</div>
     <div class="loading-sub" id="loading-sub">Esto puede tomar unos segundos</div>
   </div>
@@ -217,9 +515,24 @@
 
 <div class="container">
 
-<header>
-  <h1>PronunciaCoach TM</h1>
-  <p>Entrenador de pronunciacion en ingles - modelo Teachable Machine Audio + audios nativos desde la web - 100% en el navegador</p>
+<header class="hero">
+  <div class="hero-waves" aria-hidden="true"><span class="w2"></span><span class="w1"></span><span class="w3"></span></div>
+  <div class="hero-inner">
+    <div class="logo" aria-hidden="true">
+      <span class="logo-ring"></span><span class="logo-ring d2"></span>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg>
+    </div>
+    <div>
+      <h1>PronunciaCoach <span class="tm-badge">TM</span></h1>
+      <p class="tagline">Habla · Escucha · Mejora</p>
+      <p class="hero-sub">Entrenador de pronunciacion en ingles con un modelo de Teachable Machine Audio entrenado con tu propia voz y audios nativos de referencia.</p>
+      <a class="hero-link" href="presentacion.html">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+        Ver la presentacion del proyecto
+      </a>
+    </div>
+    <div class="eq hero-eq" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+  </div>
 </header>
 
 <div class="main">
@@ -228,31 +541,49 @@
   <h2>Elige modo</h2>
 
   <div class="mode-grid">
-    <div class="mode-card recommended" onclick="startMode('express')">
-      <div class="mode-title">Modo Rapido (SR Web)</div>
-      <div class="mode-desc">
+    <button type="button" class="mode-card recommended" onclick="startMode('express')">
+      <span class="mode-icon mi-fast" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+      </span>
+      <span class="mode-title">Modo Rapido (SR Web)</span>
+      <span class="mode-desc">
         Arranca al instante. Usa el reconocimiento de voz nativo del navegador (Web Speech Recognition API con el motor de Google) + audios nativos de Dictionary API. Funciona para cualquier palabra en ingles.
         <br><strong>Sin descargas ni configuracion.</strong>
-      </div>
-    </div>
+      </span>
+    </button>
 
-    <div class="mode-card" onclick="showCustomMode()">
-      <div class="mode-title">Modo Personal</div>
-      <div class="mode-desc">
+    <button type="button" class="mode-card" onclick="showCustomMode()">
+      <span class="mode-icon mi-personal" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="4"/><path d="M2 21v-1a7 7 0 0 1 14 0v1"/><path d="M17 5.5a4 4 0 0 1 0 5"/><path d="M20 3a8 8 0 0 1 0 10"/></svg>
+      </span>
+      <span class="mode-title">Modo Personal</span>
+      <span class="mode-desc">
         Entrena tu propio modelo TM Audio con las palabras que tu quieras (pares minimos dificiles: ship/sheep, think/sink...).
         <br>Requiere entrenamiento previo en teachablemachine.withgoogle.com.
-      </div>
-    </div>
+      </span>
+    </button>
 
-    <div class="mode-card" onclick="startMode('demo')">
-      <div class="mode-title">Modo Demo</div>
-      <div class="mode-desc">
+    <button type="button" class="mode-card" onclick="startMode('demo')">
+      <span class="mode-icon mi-demo" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg>
+      </span>
+      <span class="mode-title">Modo Demo</span>
+      <span class="mode-desc">
         Simula predicciones sin micro ni modelo. Para presentar el flujo si falla el equipo.
-      </div>
-    </div>
+      </span>
+    </button>
   </div>
 
   <div id="custom-form" style="display:none;margin-top:18px;">
+    <div class="hint" style="margin-top:0;margin-bottom:14px;">
+      <strong>Aun no tienes modelo?</strong> Entrenalo gratis en Teachable Machine (proyecto de Audio):
+      crea una clase por palabra, graba tus muestras, entrena y exporta con <em>Upload my model</em>.
+      Luego pega aqui la URL que te entrega.
+      <div class="btn-row">
+        <a class="btn-link btn-outline" href="https://teachablemachine.withgoogle.com/train/audio"
+           target="_blank" rel="noopener noreferrer">Ir a entrenar en Teachable Machine</a>
+      </div>
+    </div>
     <label style="font-size:13px;color:#4b5563;display:block;margin-bottom:6px;">
       URL del modelo TM Audio exportado:
     </label>
@@ -264,7 +595,7 @@
   </div>
 
   <div class="info-box">
-    <strong>Como funciona:</strong> la app usa el modelo <em>speech-commands</em> de Google (la misma tecnologia detras de Teachable Machine Audio) para reconocer lo que dices, y descarga la pronunciacion nativa de cada palabra desde la Dictionary API (api.dictionaryapi.dev). El audio tuyo nunca sale del navegador.
+    <strong>Como funciona:</strong> en <strong>Modo Personal</strong> la app usa tu modelo de Teachable Machine (speech-commands + TensorFlow.js) para reconocer lo que dices, todo dentro del navegador: tu voz no sale de tu dispositivo. En <strong>Modo Rapido</strong> usa el reconocimiento de voz del navegador, que envia el audio a Google. La pronunciacion nativa de cada palabra viene de la Dictionary API (api.dictionaryapi.dev). Antes de activar el microfono la app te pide consentimiento.
   </div>
 </section>
 
@@ -274,23 +605,33 @@
   </h2>
 
   <div class="mic-indicator">
-    <div class="mic-dot" id="mic-dot"></div>
-    <div><strong>Microfono</strong><br><span id="mic-status" style="font-size:12px;color:#94a3b8">Esperando audio...</span></div>
-    <div class="vol-bar"><div class="vol-bar-fill" id="vol-fill"></div></div>
+    <div class="mic-orb" id="mic-orb" aria-hidden="true">
+      <span class="orb-ring r2"></span><span class="orb-ring"></span>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg>
+    </div>
+    <div class="mic-info"><strong>Microfono</strong><span id="mic-status">Esperando audio...</span></div>
+    <canvas id="voice-canvas" class="voice-canvas" role="img" aria-label="Visualizacion de tu voz en tiempo real"></canvas>
   </div>
 
   <div class="practice-panel">
+    <div class="listen-badge">
+      <span class="eq eq-sm" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+      <span id="listen-text">Escuchando</span>
+    </div>
     <div class="target-label">Di esta palabra:</div>
     <div class="target-word" id="target-word">—</div>
     <div class="target-phonetic" id="target-phonetic"></div>
     <div class="target-meaning" id="target-meaning"></div>
     <div class="btn-row" style="justify-content:center;">
       <button id="play-btn" class="btn-play" onclick="playReferenceAudio()">
+        <svg class="ico-speaker" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>
+        <span class="eq eq-sm" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
         <span id="play-btn-text">Escuchar pronunciacion nativa</span>
       </button>
     </div>
     <div class="feedback wait" id="feedback">Escucha la pronunciacion, luego dila al microfono.</div>
     <div class="btn-row" style="justify-content:center;margin-top:12px;">
+      <button class="btn-pause" id="pause-btn" onclick="togglePause()">Pausar</button>
       <button class="btn-outline" onclick="nextWord()">Siguiente palabra</button>
       <button class="btn-secondary" onclick="skipWord()">Saltar</button>
     </div>
@@ -323,6 +664,10 @@
 
   <div class="btn-row" style="margin-top:12px;">
     <button class="btn-success" onclick="exportReport()">Exportar JSON</button>
+    <button class="btn-primary" id="pdf-btn" onclick="onPdfButton()" style="display:none">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M16 13H8"/><path d="M16 17H8"/><path d="M10 9H8"/></svg>
+      <span id="pdf-btn-text">Descargar calificacion (PDF)</span>
+    </button>
     <button class="btn-danger" onclick="stopApp()">Terminar sesion</button>
   </div>
 </section>
@@ -331,7 +676,7 @@
 
 <footer>
   PronunciaCoach TM | Pascual Bravo | Programacion Avanzada 2026
-  <br>Equipo: Jefferson Paredes, Jhon Deyby Higuita, Jorman Santiago Cataño
+  <br>Equipo: Jefferson Paredes, Jhon Deyby Piedrahita Higuita, Jorman Santiago Cataño
   <br>Tecnologias: Teachable Machine Audio (speech-commands) | TensorFlow.js | Dictionary API | Web Audio API
 </footer>
 
@@ -347,18 +692,23 @@ let recognizer = null;
 let classLabels = [];
 let labelsFull = [];
 let isRunning = false;
+let isPaused = false;
+let demoTimeoutId = null;
 let currentMode = null;      // 'express' | 'custom' | 'demo'
+const LISTEN_MSG = 'Di la palabra al microfono.';
+const PAUSE_MSG = 'En pausa. Pulsa "Reanudar" cuando quieras seguir practicando.';
 let audioCtx = null, analyser = null, mediaStream = null, volumeLoopId = null;
 
 const session = {
   session_id: null, start: null, end: null,
-  mode: null, model_url: null, classes: [],
+  mode: null, model_url: null, classes: [], consent: null,
   practice_attempts: [], summary: {}
 };
 
 let currentTarget = null;
 let currentTargetData = null; // { phonetic, audioUrl, meaning }
-let attempted = 0, hits = 0, streak = 0;
+let attempted = 0, hits = 0, streak = 0, bestStreak = 0;
+let endDialogOpen = false;   // mientras el dialogo de salida esta abierto no se cuentan intentos
 let lastDetectedAt = 0;
 const DETECTION_COOLDOWN_MS = 1500;
 
@@ -419,6 +769,17 @@ function withTimeout(promise, ms, msg) {
 }
 
 async function startMode(mode) {
+  // Modo Personal sin URL: avisar antes de pedir el microfono
+  if (mode === 'custom' && !document.getElementById('model-url').value.trim()) {
+    alert('Pega primero la URL de tu modelo de Teachable Machine.');
+    document.getElementById('model-url').focus();
+    return;
+  }
+  // Consentimiento previo, expreso e informado (Ley 1581 / Decreto 1377) antes de usar el microfono
+  if ((mode === 'express' || mode === 'custom') && !(await askConsent(mode))) {
+    setStatus('Inactivo', 'off');
+    return;
+  }
   currentMode = mode;
   try {
     if (mode === 'express') {
@@ -426,12 +787,14 @@ async function startMode(mode) {
       await loadExpressModel();
     } else if (mode === 'custom') {
       showLoading('Cargando modelo personalizado...', '');
+      loadJsPdf().catch(() => {}); // precarga el generador de PDF para la calificacion
       await withTimeout(loadCustomModel(), 45000, 'Timeout cargando el modelo personalizado.');
     } else if (mode === 'demo') {
       showLoading('Iniciando modo demo...', '');
       loadDemoMode();
     }
-    await setupMicVolume().catch((e) => { console.warn('mic no disponible', e); });
+    // El Modo Demo no usa el microfono (simula las predicciones)
+    if (mode !== 'demo') await setupMicVolume().catch((e) => { console.warn('mic no disponible', e); });
     beginSession();
     if (mode === 'demo') startDemoLoop();
     else if (mode === 'express') startSRLoop();
@@ -489,9 +852,9 @@ function startSRLoop() {
   srRecognition.onend = () => {
     srListening = false;
     // Reiniciar automaticamente para escuchar la siguiente palabra
-    if (isRunning && currentMode === 'express') {
+    if (isRunning && !isPaused && currentMode === 'express') {
       setTimeout(() => {
-        if (isRunning && !srListening) {
+        if (isRunning && !isPaused && !srListening) {
           try { srRecognition.start(); srListening = true; } catch (e) { console.warn(e); }
         }
       }, 300);
@@ -550,20 +913,77 @@ async function setupMicVolume() {
   const source = audioCtx.createMediaStreamSource(mediaStream);
   analyser = audioCtx.createAnalyser();
   analyser.fftSize = 256;
+  analyser.smoothingTimeConstant = 0.75;
   source.connect(analyser);
-  const data = new Uint8Array(analyser.frequencyBinCount);
-  const dot = document.getElementById('mic-dot');
-  const fill = document.getElementById('vol-fill');
   document.getElementById('mic-status').textContent = 'Activo';
-  function tick() {
-    analyser.getByteFrequencyData(data);
-    const avg = data.reduce((a, b) => a + b, 0) / data.length;
-    const pct = Math.min(100, (avg / 60) * 100);
-    fill.style.width = pct + '%';
-    if (pct > 15) dot.classList.add('active'); else dot.classList.remove('active');
-    volumeLoopId = requestAnimationFrame(tick);
+}
+
+// ============================================================
+// Visualizador de voz (canvas) + anillos del microfono
+// ============================================================
+function startVisualizer() {
+  if (volumeLoopId) cancelAnimationFrame(volumeLoopId);
+  const canvas = document.getElementById('voice-canvas');
+  const ctx = canvas.getContext('2d');
+  const orb = document.getElementById('mic-orb');
+  const data = analyser ? new Uint8Array(analyser.frequencyBinCount) : null;
+  // Solo las frecuencias bajas-medias: ahi vive la voz humana
+  const VOICE_BINS = data ? Math.min(data.length, 40) : 0;
+  const reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  // Sin microfono (ej. Modo Demo) se dibuja una onda de reposo mas visible
+  const idleBase = data ? 0.06 : 0.14;
+  const idleAmp = data ? 0.05 : 0.10;
+  let level = 0;
+
+  function frame(t) {
+    volumeLoopId = requestAnimationFrame(frame);
+    const w = canvas.clientWidth, h = canvas.clientHeight;
+    if (!w || !h) return;
+    const dpr = window.devicePixelRatio || 1;
+    if (canvas.width !== Math.round(w * dpr) || canvas.height !== Math.round(h * dpr)) {
+      canvas.width = Math.round(w * dpr);
+      canvas.height = Math.round(h * dpr);
+    }
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, w, h);
+
+    const live = !!(data && !isPaused);
+    let target = 0;
+    if (live) {
+      analyser.getByteFrequencyData(data);
+      let sum = 0;
+      for (let i = 0; i < VOICE_BINS; i++) sum += data[i];
+      target = Math.min(1, sum / VOICE_BINS / 110);
+    }
+    level += (target - level) * 0.3;
+    orb.style.setProperty('--level', level.toFixed(3));
+
+    // Barras espejadas desde el centro (graves al centro, agudos a los lados)
+    const BAR = 4, GAP = 3, STEP = BAR + GAP;
+    const n = Math.max(8, Math.floor((w + GAP) / STEP));
+    const x0 = (w - (n * STEP - GAP)) / 2;
+    const half = (n - 1) / 2;
+    if (isPaused) {
+      ctx.fillStyle = 'rgba(148,163,184,0.45)';
+    } else {
+      const g = ctx.createLinearGradient(0, 0, w, 0);
+      g.addColorStop(0, '#22d3ee'); g.addColorStop(0.5, '#8b5cf6'); g.addColorStop(1, '#22d3ee');
+      ctx.fillStyle = g;
+    }
+    ctx.beginPath();
+    for (let k = 0; k < n; k++) {
+      const d = Math.abs(k - half) / half; // 0 = centro, 1 = bordes
+      let amp = live ? Math.pow(data[Math.floor(d * (VOICE_BINS - 1))] / 255, 1.5) : 0;
+      if (!isPaused && !reduceMotion) {
+        amp = Math.max(amp, idleBase + idleAmp * Math.sin(t / 380 + k * 0.5));
+      }
+      const bh = Math.max(3, amp * (h - 4) * (1 - d * 0.35));
+      const x = x0 + k * STEP, y = (h - bh) / 2;
+      if (ctx.roundRect) ctx.roundRect(x, y, BAR, bh, 2); else ctx.rect(x, y, BAR, bh);
+    }
+    ctx.fill();
   }
-  tick();
+  volumeLoopId = requestAnimationFrame(frame);
 }
 
 // ============================================================
@@ -586,8 +1006,9 @@ function startListening() {
 }
 
 function startDemoLoop() {
+  clearTimeout(demoTimeoutId);
   function tick() {
-    if (!isRunning) return;
+    if (!isRunning || isPaused) return;
     const target = currentTarget || classLabels[0];
     const probs = classLabels.map(() => Math.random() * 0.3);
     const favoredIdx = Math.random() < 0.7
@@ -596,15 +1017,16 @@ function startDemoLoop() {
     const sum = probs.reduce((a, b) => a + b, 0);
     const preds = classLabels.map((l, i) => ({ label: l, score: probs[i] / sum }));
     handlePredictions(preds);
-    setTimeout(() => { if (isRunning) tick(); }, 2000);
+    demoTimeoutId = setTimeout(tick, 2000);
   }
-  setTimeout(tick, 1000);
+  demoTimeoutId = setTimeout(tick, 1000);
 }
 
 // ============================================================
 // Procesar predicciones
 // ============================================================
 function handlePredictions(preds) {
+  if (isPaused || endDialogOpen) return; // ignora resultados en pausa o con el dialogo de salida abierto
   preds.sort((a, b) => b.score - a.score);
   renderPredictionBars(preds);
 
@@ -648,6 +1070,7 @@ function processAttempt(best) {
   if (correct) {
     hits++;
     streak++;
+    if (streak > bestStreak) bestStreak = streak;
     showFeedback('Correcto! Sonaste muy claro.', 'ok');
     markWordChip(currentTarget, 'correct');
   } else {
@@ -670,12 +1093,23 @@ function updateStats() {
   document.getElementById('stat-accuracy').textContent =
     attempted ? Math.round(100 * hits / attempted) + '%' : '0%';
   document.getElementById('stat-streak').textContent = streak;
+  // La calificacion en PDF necesita al menos un intento
+  document.getElementById('pdf-btn').disabled = attempted === 0;
 }
 
 function showFeedback(msg, type) {
   const el = document.getElementById('feedback');
   el.textContent = msg;
   el.className = 'feedback ' + type;
+  if (type === 'ok' || type === 'bad') {
+    // Forzar reflow para que la animacion se repita en cada intento
+    void el.offsetWidth;
+    el.classList.add('animate');
+    const panel = document.querySelector('.practice-panel');
+    panel.classList.remove('flash-ok', 'flash-bad');
+    void panel.offsetWidth;
+    panel.classList.add(type === 'ok' ? 'flash-ok' : 'flash-bad');
+  }
 }
 
 function appendLog(detected, prob, target, correct) {
@@ -705,12 +1139,39 @@ async function nextWord() {
 
 function skipWord() { nextWord(); }
 
+// Pinta la palabra letra por letra para poder animarlas
+function renderTargetWord(word) {
+  const el = document.getElementById('target-word');
+  setSpeaking(false);
+  el.innerHTML = '';
+  Array.from(word.toUpperCase()).forEach((ch, i) => {
+    const outer = document.createElement('span');
+    outer.className = 'l';
+    outer.style.setProperty('--i', i);
+    const inner = document.createElement('span');
+    inner.textContent = ch === ' ' ? ' ' : ch;
+    outer.appendChild(inner);
+    el.appendChild(outer);
+  });
+  el.setAttribute('aria-label', word);
+}
+
+// Mientras suena la pronunciacion nativa, las letras "bailan"
+let speakingTimer = null;
+function setSpeaking(on) {
+  clearTimeout(speakingTimer);
+  document.getElementById('target-word').classList.toggle('speaking', on);
+  document.getElementById('play-btn').classList.toggle('playing', on);
+  // Respaldo por si el navegador nunca avisa que termino el audio
+  if (on) speakingTimer = setTimeout(() => setSpeaking(false), 4000);
+}
+
 async function loadTargetWordData(word) {
-  document.getElementById('target-word').textContent = word.toUpperCase();
+  renderTargetWord(word);
   document.getElementById('target-phonetic').textContent = '';
   document.getElementById('target-meaning').innerHTML = PRON_TIPS[word.toLowerCase()]
     ? `<strong>Tip:</strong> ${PRON_TIPS[word.toLowerCase()]}` : '';
-  showFeedback('Di la palabra al microfono.', 'wait');
+  showFeedback(isPaused ? PAUSE_MSG : LISTEN_MSG, 'wait');
 
   // Modo Personal: no fetch de audio nativo, solo el texto de la palabra
   // El modelo entrenado por el usuario ya conoce las palabras que debe reconocer
@@ -781,6 +1242,8 @@ function playReferenceAudio() {
     try {
       const audio = new Audio(currentTargetData.audioUrl);
       audio.volume = 1.0;
+      audio.onplaying = () => setSpeaking(true);
+      audio.onended = () => setSpeaking(false);
       audio.play().then(() => {}).catch(e => {
         console.warn('audio nativo fallo, usando TTS', e);
         speakWithTTS(currentTargetData.word);
@@ -808,6 +1271,9 @@ function speakWithTTS(word) {
     const voices = speechSynthesis.getVoices();
     const enVoice = voices.find(v => v.lang.startsWith('en'));
     if (enVoice) utter.voice = enVoice;
+    utter.onstart = () => setSpeaking(true);
+    utter.onend = () => setSpeaking(false);
+    utter.onerror = () => setSpeaking(false);
     speechSynthesis.speak(utter);
   } catch (e) { console.warn('TTS error', e); }
 }
@@ -844,34 +1310,182 @@ function markWordChip(word, cls) {
 // ============================================================
 function beginSession() {
   session.session_id = 'ses_' + Date.now();
+  // Evidencia del consentimiento en el reporte (nunca se guarda audio)
+  session.consent = consentGiven[currentMode]
+    ? { accepted_at: consentGiven[currentMode], version: CONSENT_VERSION, audio_leaves_device: currentMode === 'express' }
+    : null;
   session.start = new Date().toISOString();
+  session.end = null;
   session.practice_attempts = [];
-  attempted = 0; hits = 0; streak = 0; currentTarget = null;
+  attempted = 0; hits = 0; streak = 0; bestStreak = 0; currentTarget = null;
   isRunning = true;
+  isPaused = false;
+  updatePauseUI();
+  document.getElementById('pdf-btn').style.display = currentMode === 'custom' ? '' : 'none';
 
   document.getElementById('config-panel').style.display = 'none';
   document.getElementById('live-panel').style.display = 'block';
+  startVisualizer();
   document.getElementById('session-log').innerHTML = '';
   document.getElementById('predictions-list').innerHTML = '';
   updateStats();
   nextWord();
 }
 
-function stopApp() {
+// ============================================================
+// Terminar sesion: preguntar antes de descargar
+// ============================================================
+// Boton "Terminar sesion": nunca descarga por su cuenta, primero pregunta
+function stopApp() { openEndDialog(); }
+
+function openEndDialog() {
+  if (!isRunning) { stopSession(); return; }
+  const attempts = session.practice_attempts;
+  const total = attempts.length;
+  const correct = attempts.filter(a => a.correct).length;
+  const isCustom = currentMode === 'custom';
+
+  document.getElementById('end-summary').textContent = total
+    ? `Hiciste ${total} intento${total === 1 ? '' : 's'} con ${Math.round(100 * correct / total)}% de precision.`
+    : 'Aun no hiciste intentos en esta sesion, asi que no hay reporte para descargar.';
+
+  const gradeEl = document.getElementById('end-grade');
+  if (isCustom && total) {
+    const g = gradeFromAccuracy(correct / total), lvl = gradeLevel(g);
+    const cap = document.createElement('span'); cap.className = 'end-grade-cap'; cap.textContent = 'Tu nota';
+    const num = document.createElement('span'); num.className = 'end-grade-num'; num.textContent = g.toFixed(1);
+    num.style.color = `rgb(${lvl.color.join(',')})`;
+    const rest = document.createElement('span'); rest.className = 'end-grade-rest'; rest.textContent = `/ 5.0 · ${lvl.label}`;
+    gradeEl.replaceChildren(cap, num, rest);
+    gradeEl.style.display = '';
+  } else {
+    gradeEl.style.display = 'none';
+  }
+
+  document.getElementById('end-downloads').style.display = total ? '' : 'none';
+  document.getElementById('end-question').textContent = isCustom
+    ? 'Quieres descargar algo antes de salir?'
+    : 'Quieres descargar el reporte JSON antes de salir?';
+  document.getElementById('end-options').style.display = isCustom ? '' : 'none';
+  document.getElementById('opt-pdf').checked = true;
+  document.getElementById('opt-json').checked = false;
+  document.getElementById('end-exit-btn').textContent = total ? 'Salir sin descargar' : 'Salir';
+  document.getElementById('end-download-btn').style.display = total ? '' : 'none';
+  updateEndDownloadButton();
+
+  endDialogOpen = true;
+  document.getElementById('end-dialog').showModal();
+}
+
+function updateEndDownloadButton() {
+  const btn = document.getElementById('end-download-btn');
+  if (currentMode === 'custom') {
+    const anyChecked = document.getElementById('opt-pdf').checked || document.getElementById('opt-json').checked;
+    btn.disabled = !anyChecked;
+    btn.textContent = 'Descargar y salir';
+  } else {
+    btn.disabled = false;
+    btn.textContent = 'Descargar JSON y salir';
+  }
+}
+
+function closeEndDialog() {
+  const dlg = document.getElementById('end-dialog');
+  if (dlg.open) dlg.close();
+}
+
+async function finishSession(withDownload) {
+  session.end = new Date().toISOString();
+  if (withDownload) {
+    const isCustom = currentMode === 'custom';
+    const wantPdf = isCustom && document.getElementById('opt-pdf').checked;
+    const wantJson = !isCustom || document.getElementById('opt-json').checked;
+    const btn = document.getElementById('end-download-btn');
+    btn.disabled = true;
+    btn.textContent = 'Generando...';
+    try {
+      if (wantJson) await exportReport();
+      if (wantPdf) await downloadPdfReport();
+    } catch (e) {
+      // Si falla, la sesion sigue abierta para reintentar o salir sin descargar
+      console.error('Error al descargar:', e);
+      session.end = null;
+      alert('No se pudo generar la descarga:\n\n' + e.message);
+      updateEndDownloadButton();
+      return;
+    }
+  }
+  closeEndDialog();
+  stopSession();
+}
+
+function stopSession() {
   isRunning = false;
+  clearTimeout(demoTimeoutId);
   if (recognizer && recognizer.isListening && recognizer.isListening()) recognizer.stopListening();
   if (srRecognition) { try { srRecognition.stop(); } catch(_){} srRecognition = null; srListening = false; }
   if (volumeLoopId) cancelAnimationFrame(volumeLoopId);
+  volumeLoopId = null;
   if (mediaStream) mediaStream.getTracks().forEach(t => t.stop());
   if (audioCtx) audioCtx.close();
-  session.end = new Date().toISOString();
-  setStatus('Sesion terminada', 'warn');
-  if (confirm('Sesion terminada. Descargar reporte JSON?')) exportReport();
-  setTimeout(() => {
-    document.getElementById('live-panel').style.display = 'none';
-    document.getElementById('config-panel').style.display = 'block';
-    setStatus('Inactivo', 'off');
-  }, 500);
+  mediaStream = null; audioCtx = null; analyser = null;
+  setSpeaking(false);
+  if (!session.end) session.end = new Date().toISOString();
+  document.getElementById('live-panel').style.display = 'none';
+  document.getElementById('config-panel').style.display = 'block';
+  setStatus('Inactivo', 'off');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ============================================================
+// Pausa
+// ============================================================
+async function togglePause() {
+  if (!isRunning) return;
+  const btn = document.getElementById('pause-btn');
+  btn.disabled = true; // evita doble clic mientras se detiene/reanuda
+  try {
+    if (!isPaused) {
+      isPaused = true;
+      if (currentMode === 'express' && srRecognition) {
+        try { srRecognition.abort(); } catch (_) {}
+      } else if (currentMode === 'custom' && recognizer && recognizer.isListening()) {
+        await recognizer.stopListening();
+      } else if (currentMode === 'demo') {
+        clearTimeout(demoTimeoutId);
+      }
+      setStatus('En pausa', 'warn');
+      showFeedback(PAUSE_MSG, 'wait');
+    } else {
+      isPaused = false;
+      if (currentMode === 'express' && srRecognition) {
+        // Si aun no termino de detenerse, start() falla y el onend lo reinicia solo
+        try { srRecognition.start(); srListening = true; } catch (_) {}
+      } else if (currentMode === 'custom' && recognizer && !recognizer.isListening()) {
+        startListening();
+      } else if (currentMode === 'demo') {
+        startDemoLoop();
+      }
+      setStatus(currentMode === 'demo' ? 'Demo' : 'Escuchando', 'ok');
+      showFeedback(LISTEN_MSG, 'wait');
+    }
+  } catch (e) {
+    console.error('Error al pausar/reanudar:', e);
+  } finally {
+    updatePauseUI();
+    btn.disabled = false;
+  }
+}
+
+function updatePauseUI() {
+  const btn = document.getElementById('pause-btn');
+  btn.textContent = isPaused ? 'Reanudar' : 'Pausar';
+  btn.className = isPaused ? 'btn-success' : 'btn-pause';
+  document.body.classList.toggle('is-paused', isPaused);
+  document.getElementById('listen-text').textContent = isPaused ? 'En pausa' : 'Escuchando';
+  document.getElementById('mic-status').textContent =
+    currentMode === 'demo' ? 'No se usa en Modo Demo'
+      : !mediaStream ? 'Esperando audio...' : isPaused ? 'En pausa' : 'Activo';
 }
 
 function buildSummary() {
@@ -890,6 +1504,8 @@ function buildSummary() {
     total_attempts: total,
     correct,
     accuracy: total ? +(correct / total * 100).toFixed(1) : 0,
+    best_streak: bestStreak,
+    ...(currentMode === 'custom' && total ? { grade_0_to_5: gradeFromAccuracy(correct / total) } : {}),
     by_word: byTarget,
     hardest_words: difficulty.slice(0, 3),
     native_audios_used: Object.keys(wordCache).length,
@@ -918,11 +1534,358 @@ async function exportReport() {
   URL.revokeObjectURL(url);
 }
 
+// ============================================================
+// Calificacion en PDF (solo Modo Personal)
+// ============================================================
+const JSPDF_URL = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+let jsPdfPromise = null;
+
+// Carga jsPDF solo cuando hace falta (no pesa en los otros modos)
+function loadJsPdf() {
+  if (window.jspdf && window.jspdf.jsPDF) return Promise.resolve(window.jspdf.jsPDF);
+  if (!jsPdfPromise) {
+    jsPdfPromise = new Promise((resolve, reject) => {
+      const s = document.createElement('script');
+      s.src = JSPDF_URL;
+      s.onload = () => (window.jspdf && window.jspdf.jsPDF)
+        ? resolve(window.jspdf.jsPDF) : reject(new Error('jsPDF no quedo disponible.'));
+      s.onerror = () => {
+        jsPdfPromise = null; s.remove();
+        reject(new Error('No se pudo cargar el generador de PDF. Revisa tu conexion a internet.'));
+      };
+      document.head.appendChild(s);
+    });
+  }
+  return jsPdfPromise;
+}
+
+// Escala colombiana: 0.0 a 5.0, se aprueba con 3.0
+function gradeFromAccuracy(acc) { return Math.round(acc * 50) / 10; }
+function gradeLevel(g) {
+  if (g >= 4.5) return { label: 'Excelente', color: [16, 185, 129] };
+  if (g >= 4.0) return { label: 'Muy bien', color: [13, 148, 136] };
+  if (g >= 3.5) return { label: 'Bien', color: [14, 165, 233] };
+  if (g >= 3.0) return { label: 'Aceptable', color: [217, 119, 6] };
+  return { label: 'Por mejorar', color: [220, 38, 38] };
+}
+
+// Las fuentes base del PDF solo soportan Latin-1: se limpian simbolos IPA, comillas curvas, etc.
+function pdfSafe(s) {
+  return String(s == null ? '' : s)
+    .replace(/[ -​  　]/g, ' ')
+    .replace(/[‘’]/g, "'").replace(/[“”]/g, '"')
+    .replace(/[–—]/g, '-')
+    .replace(/[^\x00-\xFF]/g, '');
+}
+
+function formatDuration(ms) {
+  const s = Math.max(0, Math.round(ms / 1000));
+  const m = Math.floor(s / 60), r = s % 60;
+  return m ? `${m} min ${r} s` : `${r} s`;
+}
+
+// Resultado por palabra: primero las mas dificiles, al final las no practicadas
+function computeWordStats() {
+  const by = {};
+  classLabels.forEach(w => { by[w] = { word: w, attempts: 0, correct: 0 }; });
+  session.practice_attempts.forEach(a => {
+    if (!by[a.target]) by[a.target] = { word: a.target, attempts: 0, correct: 0 };
+    by[a.target].attempts++;
+    if (a.correct) by[a.target].correct++;
+  });
+  return Object.values(by)
+    .map(s => ({ ...s, accuracy: s.attempts ? s.correct / s.attempts : null }))
+    .sort((a, b) => ((a.accuracy === null) - (b.accuracy === null))
+      || ((a.accuracy || 0) - (b.accuracy || 0)) || (b.attempts - a.attempts));
+}
+
+// "Querias decir X y el modelo escucho Y": la info mas util para pares minimos
+function topConfusions(attempts, limit = 4) {
+  const map = new Map();
+  attempts.filter(a => !a.correct).forEach(a => {
+    const k = a.target + '\u0000' + a.detected;
+    map.set(k, { target: a.target, detected: a.detected, n: (map.get(k)?.n || 0) + 1 });
+  });
+  return [...map.values()].sort((a, b) => b.n - a.n).slice(0, limit);
+}
+
+function buildRecommendations(words, confusions, total, grade) {
+  const recs = [];
+  if (total < 10) {
+    recs.push(`Hiciste ${total} intento${total === 1 ? '' : 's'}. Practica al menos 10 para que la nota sea más confiable.`);
+  }
+  words.filter(w => w.accuracy !== null && w.accuracy < 0.6).slice(0, 2).forEach(w => {
+    const pct = Math.round(w.accuracy * 100);
+    const c = confusions.find(x => x.target === w.word);
+    recs.push(c
+      ? `Refuerza "${w.word}" (${pct}% de precisión): se confundió sobre todo con "${c.detected}". Practica el par ${w.word} / ${c.detected} exagerando la diferencia entre los dos sonidos.`
+      : `Refuerza "${w.word}" (${pct}% de precisión): repítela despacio y luego a velocidad normal.`);
+  });
+  const notPracticed = words.filter(w => w.accuracy === null).map(w => `"${w.word}"`);
+  if (notPracticed.length) {
+    recs.push(`No alcanzaste a practicar: ${notPracticed.join(', ')}. ${notPracticed.length === 1 ? 'Inclúyela' : 'Inclúyelas'} en tu próxima sesión.`);
+  }
+  if (grade >= 4.5 && total >= 10) {
+    recs.push('Excelente resultado. Para seguir mejorando, entrena un modelo nuevo con pares mínimos más difíciles (por ejemplo think / sink o very / berry).');
+  }
+  if (confusions.length && grade < 4) {
+    recs.push('Si estás seguro de que pronuncias bien pero el modelo se equivoca, agrega más muestras en Teachable Machine (en varias sesiones de grabación) y vuelve a entrenarlo.');
+  }
+  if (!recs.length) recs.push('Buen trabajo. Mantén una práctica diaria de 5 a 10 minutos para consolidar los sonidos.');
+  return recs;
+}
+
+async function buildPdfReport() {
+  const JsPDF = await loadJsPdf();
+  const doc = new JsPDF({ unit: 'mm', format: 'a4' });
+  const T = pdfSafe;
+  const W = 210, H = 297, M = 16, CW = W - 2 * M;
+  const C = {
+    ink: [11, 16, 38], brand: [109, 93, 252], cyan: [34, 211, 238], text: [31, 41, 55],
+    muted: [107, 114, 128], line: [231, 232, 242], soft: [246, 247, 252],
+    lav: [243, 240, 255], lavLine: [228, 222, 254], white: [255, 255, 255], red: [239, 68, 68]
+  };
+  const fill = c => doc.setFillColor(c[0], c[1], c[2]);
+  const color = c => doc.setTextColor(c[0], c[1], c[2]);
+  const stroke = c => doc.setDrawColor(c[0], c[1], c[2]);
+  const font = (style, size) => { doc.setFont('helvetica', style); doc.setFontSize(size); };
+  const fit = (txt, maxW) => { let t = T(txt); while (t.length > 1 && doc.getTextWidth(t) > maxW) t = t.slice(0, -1); return t; };
+
+  const attempts = session.practice_attempts;
+  const total = attempts.length;
+  const correct = attempts.filter(a => a.correct).length;
+  const acc = total ? correct / total : 0;
+  const grade = gradeFromAccuracy(acc);
+  const lvl = gradeLevel(grade);
+  const words = computeWordStats();
+  const confusions = topConfusions(attempts);
+  const start = session.start ? new Date(session.start) : new Date();
+  const end = session.end ? new Date(session.end) : new Date();
+  const fecha = start.toLocaleString('es-CO', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+
+  let y = 0;
+  const ensure = h => { if (y + h > H - 30) { doc.addPage(); y = 20; } };
+  const section = title => {
+    ensure(18);
+    [3, 6, 9, 5, 2].forEach((h, i) => { fill(C.brand); doc.roundedRect(M + i * 1.8, y - 1.8 - h / 2, 1, h, 0.5, 0.5, 'F'); });
+    color(C.ink); font('bold', 12.5); doc.text(T(title), M + 11, y);
+    stroke(C.line); doc.setLineWidth(0.4); doc.line(M, y + 3, W - M, y + 3);
+    y += 10;
+  };
+
+  // --- Encabezado con onda de voz ---
+  fill(C.ink); doc.rect(0, 0, W, 42, 'F');
+  const bars = [4, 7, 11, 15, 10, 6, 13, 17, 12, 8, 5, 9, 14, 10, 6, 4];
+  bars.forEach((h, i) => {
+    fill(i % 2 ? C.brand : C.cyan);
+    doc.roundedRect(W - M - bars.length * 3.4 + i * 3.4, 21 - h / 2, 1.9, h, 0.9, 0.9, 'F');
+  });
+  color(C.white); font('bold', 21); doc.text(T('Reporte de pronunciación'), M, 18);
+  color(C.cyan); font('bold', 9); doc.text(T('PRONUNCIACOACH TM  ·  MODO PERSONAL'), M, 26);
+  color([203, 213, 225]); font('normal', 9);
+  doc.text(T(`${fecha}   ·   Duración: ${formatDuration(end - start)}`), M, 34);
+  y = 52;
+  color(C.muted); font('normal', 8.5);
+  doc.text(fit('Modelo de Teachable Machine: ' + (session.model_url || '-'), CW), M, y);
+  y += 6;
+
+  // --- Tarjeta de nota ---
+  const cardH = 44;
+  fill(C.lav); stroke(C.lavLine); doc.setLineWidth(0.4);
+  doc.roundedRect(M, y, CW, cardH, 4, 4, 'FD');
+  color(C.muted); font('bold', 8); doc.text('NOTA FINAL', M + 10, y + 11);
+  const gTxt = grade.toFixed(1);
+  color(lvl.color); font('bold', 46); doc.text(gTxt, M + 9, y + 32);
+  const gw = doc.getTextWidth(gTxt);
+  color(C.muted); font('normal', 15); doc.text('/ 5.0', M + 11 + gw, y + 32);
+  const rx = M + 82, rw = CW - 82 - 10;
+  color(lvl.color); font('bold', 17); doc.text(T(lvl.label), rx, y + 14);
+  color(C.text); font('normal', 10);
+  doc.text(T(`${correct} de ${total} intentos correctos (${Math.round(acc * 100)}% de precisión)`), rx, y + 22);
+  fill(C.line); doc.roundedRect(rx, y + 26, rw, 4, 2, 2, 'F');
+  if (acc > 0) { fill(lvl.color); doc.roundedRect(rx, y + 26, Math.max(4, rw * acc), 4, 2, 2, 'F'); }
+  color(C.muted); font('normal', 8);
+  doc.text(T('Escala de 0.0 a 5.0  ·  se aprueba con 3.0'), rx, y + 37);
+  y += cardH + 8;
+
+  // --- Estadisticas ---
+  const stats = [['INTENTOS', String(total)], ['ACIERTOS', String(correct)],
+                 ['PRECISIÓN', Math.round(acc * 100) + '%'], ['MEJOR RACHA', String(bestStreak)]];
+  const gap = 4, bw = (CW - gap * 3) / 4, bh = 20;
+  stats.forEach(([label, val], i) => {
+    const bx = M + i * (bw + gap);
+    fill(C.soft); stroke(C.line); doc.roundedRect(bx, y, bw, bh, 3, 3, 'FD');
+    fill(C.brand); doc.rect(bx, y + 3, 1.2, bh - 6, 'F');
+    color(C.muted); font('bold', 7); doc.text(T(label), bx + 5, y + 7.5);
+    color(C.ink); font('bold', 15); doc.text(T(val), bx + 5, y + 16);
+  });
+  y += bh + 12;
+
+  // --- Resultado por palabra ---
+  section('Resultado por palabra');
+  const col = { word: M + 3, att: M + 62, ok: M + 84, pct: M + 106, grade: M + 130, bar: M + 148 };
+  const barW = W - M - 3 - col.bar;
+  color(C.muted); font('bold', 7.5);
+  doc.text('PALABRA', col.word, y); doc.text('INTENTOS', col.att, y); doc.text('ACIERTOS', col.ok, y);
+  doc.text(T('PRECISIÓN'), col.pct, y); doc.text('NOTA', col.grade, y);
+  y += 2.5;
+  words.forEach((w, i) => {
+    const rh = 8.5;
+    ensure(rh);
+    if (i % 2 === 0) { fill(C.soft); doc.rect(M, y, CW, rh, 'F'); }
+    const base = y + 5.7;
+    color(C.ink); font('bold', 10); doc.text(fit(w.word, col.att - col.word - 4), col.word, base);
+    if (w.accuracy === null) {
+      color(C.muted); font('italic', 9); doc.text('Sin intentos', col.att, base);
+    } else {
+      const g = gradeFromAccuracy(w.accuracy), l = gradeLevel(g);
+      color(C.text); font('normal', 10);
+      doc.text(String(w.attempts), col.att, base);
+      doc.text(String(w.correct), col.ok, base);
+      doc.text(Math.round(w.accuracy * 100) + '%', col.pct, base);
+      color(l.color); font('bold', 10); doc.text(g.toFixed(1), col.grade, base);
+      fill(C.line); doc.roundedRect(col.bar, y + 3, barW, 2.6, 1.3, 1.3, 'F');
+      if (w.accuracy > 0) { fill(l.color); doc.roundedRect(col.bar, y + 3, Math.max(2.6, barW * w.accuracy), 2.6, 1.3, 1.3, 'F'); }
+    }
+    y += rh;
+  });
+  y += 10;
+
+  // --- Confusiones ---
+  section('Confusiones más frecuentes');
+  if (!confusions.length) {
+    color(C.text); font('normal', 10);
+    doc.text(T(total ? 'No hubo confusiones entre palabras. ¡Muy bien!' : 'Aún no hay intentos registrados.'), M + 3, y);
+    y += 8;
+  } else {
+    confusions.forEach(c => {
+      ensure(8);
+      fill(C.red); doc.circle(M + 4, y - 1.3, 1.1, 'F');
+      let x = M + 8;
+      const parts = [
+        [`"${c.target}"`, 'bold', C.ink], ['sonó como', 'normal', C.muted],
+        [`"${c.detected}"`, 'bold', C.ink], [`·  ${c.n} ${c.n === 1 ? 'vez' : 'veces'}`, 'normal', C.muted]
+      ];
+      parts.forEach(([txt, style, col2]) => {
+        color(col2); font(style, 10); const t = T(txt); doc.text(t, x, y); x += doc.getTextWidth(t) + 2;
+      });
+      y += 7;
+    });
+  }
+  y += 5;
+
+  // --- Recomendaciones ---
+  section('Recomendaciones');
+  buildRecommendations(words, confusions, total, grade).forEach(r => {
+    font('normal', 10);
+    const lines = doc.splitTextToSize(T(r), CW - 10);
+    ensure(lines.length * 5 + 3);
+    fill(C.brand); doc.circle(M + 4, y - 1.3, 1.1, 'F');
+    color(C.text); doc.text(lines, M + 8, y);
+    y += lines.length * 5 + 3;
+  });
+
+  // --- Pie de pagina ---
+  const pages = doc.getNumberOfPages();
+  for (let p = 1; p <= pages; p++) {
+    doc.setPage(p);
+    stroke(C.line); doc.setLineWidth(0.4); doc.line(M, H - 22, W - M, H - 22);
+    color(C.muted); font('normal', 7.5);
+    doc.text(doc.splitTextToSize(T('La nota mide qué tan bien distingue tu modelo personal de Teachable Machine las palabras que entrenaste con tu voz. Es una herramienta de práctica, no una certificación oficial de inglés.'), CW), M, H - 17);
+    color(C.brand); font('bold', 7.5);
+    doc.text(T('PronunciaCoach TM  ·  Institución Universitaria Pascual Bravo  ·  Programación Avanzada 2026'), M, H - 8);
+    color(C.muted); font('normal', 7.5);
+    doc.text(`${p} / ${pages}`, W - M, H - 8, { align: 'right' });
+  }
+  return doc;
+}
+
+async function downloadPdfReport() {
+  const doc = await buildPdfReport();
+  doc.save(`pronunciacoach_calificacion_${session.session_id || Date.now()}.pdf`);
+}
+
+// Boton "Descargar calificacion (PDF)" del panel de practica
+async function onPdfButton() {
+  const btn = document.getElementById('pdf-btn');
+  const label = document.getElementById('pdf-btn-text');
+  btn.disabled = true;
+  label.textContent = 'Generando PDF...';
+  try { await downloadPdfReport(); }
+  catch (e) { console.error(e); alert(e.message); }
+  finally {
+    label.textContent = 'Descargar calificacion (PDF)';
+    btn.disabled = attempted === 0;
+  }
+}
+
 function setStatus(txt, type) {
   const p = document.getElementById('status-pill');
   p.textContent = txt;
   p.className = 'status-pill ' + (type === 'ok' ? 'status-ok' : type === 'warn' ? 'status-warn' : 'status-off');
 }
+
+// Dialogo de salida: Esc o "Seguir practicando" vuelven a contar intentos
+document.getElementById('end-dialog').addEventListener('close', () => { endDialogOpen = false; });
+document.getElementById('opt-pdf').addEventListener('change', updateEndDownloadButton);
+document.getElementById('opt-json').addEventListener('change', updateEndDownloadButton);
+
+// ============================================================
+// Consentimiento antes de activar el microfono
+// ============================================================
+const CONSENT_VERSION = '2026-11-06';
+const consentGiven = {};   // modo -> fecha de aceptacion (vale mientras la pagina este abierta)
+let consentResolver = null;
+const CONSENT_TEXT = {
+  custom: [
+    ['ok', 'Tu voz se analiza solo en este dispositivo, con tu modelo de Teachable Machine (TensorFlow.js).'],
+    ['ok', 'No se envia ni se guarda ningun audio.'],
+    ['ok', 'Los reportes que descargues (JSON o PDF) solo contienen palabras, porcentajes y horas.']
+  ],
+  express: [
+    ['warn', 'Para convertir tu voz en texto, el navegador la envia a su servicio de reconocimiento de voz (en Chrome, a servidores de Google).'],
+    ['ok', 'PronunciaCoach no guarda tu audio. Los reportes (JSON) solo contienen palabras, porcentajes y horas.'],
+    ['ok', 'Si prefieres que tu voz no salga de tu dispositivo, usa el Modo Personal.']
+  ]
+};
+
+function askConsent(mode) {
+  if (consentGiven[mode]) return Promise.resolve(true);
+  const list = document.getElementById('consent-list');
+  list.replaceChildren(...CONSENT_TEXT[mode].map(([kind, text]) => {
+    const li = document.createElement('li');
+    if (kind === 'warn') li.className = 'warn';
+    li.textContent = text;
+    return li;
+  }));
+  return new Promise(resolve => {
+    consentResolver = accepted => {
+      if (accepted) consentGiven[mode] = new Date().toISOString();
+      resolve(accepted);
+    };
+    document.getElementById('consent-dialog').showModal();
+  });
+}
+
+function resolveConsent(accepted) {
+  const dlg = document.getElementById('consent-dialog');
+  const done = consentResolver;
+  consentResolver = null;
+  if (dlg.open) dlg.close();
+  if (done) done(accepted);
+}
+// Esc o cerrar el dialogo cuenta como "Cancelar"
+document.getElementById('consent-dialog').addEventListener('close', () => { if (consentResolver) resolveConsent(false); });
+
+// Enlace con el modelo ya cargado: index.html?model=https://teachablemachine.withgoogle.com/models/XXXX/
+(() => {
+  const model = new URLSearchParams(location.search).get('model');
+  if (model && /^https:\/\//i.test(model)) {
+    document.getElementById('model-url').value = model;
+    showCustomMode();
+  }
+})();
+
 </script>
 </body>
 </html>
