@@ -26,10 +26,11 @@ Los hispanohablantes aprendiendo inglés tienen un ciclo frustrante:
 2. **Qué es Teachable Machine (4 min)** — Herramienta web gratuita de Google para entrenar clasificadores sin código, usando transfer learning.
 3. **Por qué proyecto Audio en lugar de Image o Pose (2 min)** — Es el menos usado; el vocabulario de inglés es ideal para clasificación por espectrograma.
 4. **Arquitectura de la solución (4 min)** — Diagrama + flujo de datos.
-5. **Demo en vivo (12 min)** — Modo práctica + exportar JSON + modo libre.
+5. **Demo en vivo (12 min)** — Modo Personal con el modelo entrenado + un caso que falle a propósito + exportar JSON/PDF.
 6. **Decisiones técnicas y preguntas Requeridas (6 min)**.
-7. **Limitaciones y futuro (3 min)**.
-8. **Preguntas**.
+7. **Limitaciones y dificultades del desarrollo (3 min)**.
+8. **Mejoras futuras y conclusión (2 min)**.
+9. **Preguntas**.
 
 ---
 
@@ -41,12 +42,15 @@ Los hispanohablantes aprendiendo inglés tienen un ciclo frustrante:
 - **Decreto 1377 de 2013** — reglamenta el consentimiento.
 - **GDPR** (si hay usuarios UE) — Art. 9 clasifica biometría como categoría especial.
 
-**Cómo cumple PronunciaCoach TM**: el audio **nunca sale del navegador del usuario**; el procesamiento ocurre completamente en el dispositivo con TensorFlow.js. No hay recolección ni tratamiento de dato biométrico en el sentido legal porque nada se transmite ni almacena en servidores.
+**Cómo cumple PronunciaCoach TM**: en **Modo Personal** el audio **nunca sale del navegador del usuario**; el procesamiento ocurre completamente en el dispositivo con TensorFlow.js. No hay recolección ni tratamiento de dato biométrico en el sentido legal porque nada se transmite ni almacena en servidores.
+
+**Ojo con el Modo Rápido**: usa la Web Speech API del navegador, que en Chrome **envía la voz a servidores de Google** para convertirla en texto. Por eso la app muestra un aviso y pide consentimiento antes de activar el micrófono, y recomienda el Modo Personal cuando la privacidad es prioritaria.
 
 ### 2. Privacidad
 
-- Procesamiento 100% local — el micrófono se conecta vía Web Audio API al modelo en memoria.
-- El modelo se descarga una vez desde el CDN de Teachable Machine; después opera offline.
+- Procesamiento 100% local en Modo Personal — el micrófono se conecta vía Web Audio API al modelo en memoria.
+- El modelo se descarga una vez desde el CDN de Teachable Machine; después la inferencia no necesita red.
+- En Modo Rápido la voz sí sale del dispositivo (servicio de voz de Google); la app lo avisa y pide consentimiento.
 - El JSON del reporte solo contiene etiquetas de palabra, probabilidades y timestamps; **no incluye audio**.
 - Cero cuentas, cero cookies, cero telemetría.
 - **Privacy by Design** (Art. 25 GDPR).
@@ -77,7 +81,7 @@ Escalable a producto comercial: dominio ($12/año) + CDN opcional. El costo marg
 │    └── (clase "Background Noise" se agrega sola)          │
 │                        ↓                                  │
 │  Transfer learning sobre ventanas de 1s + espectrograma  │
-│    (Short-Time Fourier Transform → MobileNet audio)       │
+│    (Short-Time Fourier Transform → CNN Speech Cmds)       │
 │                        ↓                                  │
 │  Export → TensorFlow.js  →  URL pública del modelo       │
 └─────────────────────────────────────────────────────────┘
@@ -92,12 +96,12 @@ Escalable a producto comercial: dominio ($12/año) + CDN opcional. El costo marg
 │    ├── speech-commands.listen() analiza ventanas de ~1s   │
 │    ├── Para cada ventana → vector de probabilidades       │
 │    ├── Modo práctica: compara con palabra objetivo        │
-│    ├── Debounce 1.2s + threshold 0.6                       │
+│    ├── Debounce 1.5s + threshold 0.6                       │
 │    └── Exportar sesión como JSON                          │
 └─────────────────────────────────────────────────────────┘
 ```
 
-**Stack**: HTML + CSS + JS vanilla · TensorFlow.js 1.3 · `@tensorflow-models/speech-commands` 0.4 · BROWSER_FFT (Short-Time Fourier Transform en el navegador) · Web Audio API.
+**Stack**: HTML + CSS + JS vanilla · TensorFlow.js 1.3.1 · `@tensorflow-models/speech-commands` 0.4.0 · BROWSER_FFT (Short-Time Fourier Transform en el navegador) · Web Audio API.
 
 ### 5. Problema / funcionalidad
 
@@ -114,7 +118,7 @@ Escalable a producto comercial: dominio ($12/año) + CDN opcional. El costo marg
 | Entrenar con pocas tomas → sobreajuste a la cabina/ruido de fondo | Guía: mínimo 30 tomas por palabra en al menos 2 sesiones |
 | Reconocer "palabra incorrecta" no es lo mismo que "pronunciación realmente nativa" | Documentado como limitación; el objetivo es *producir distintivamente*, no imitar acento |
 | Ruido de fondo intermitente confunde el modelo | Threshold 0.6 + clase "Background Noise" automática de TM |
-| Falsos positivos repetidos desmotivan | Debounce de 1.2s y "modo libre" para experimentar sin puntaje |
+| Falsos positivos repetidos desmotivan | Debounce de 1.5s, umbral de confianza y botón de pausa |
 | Uso para evaluar certificaciones | Advertencia explícita: es herramienta de práctica personal, no evaluación oficial |
 
 ### 7. ¿Qué consentimiento se necesita?
@@ -122,8 +126,8 @@ Escalable a producto comercial: dominio ($12/año) + CDN opcional. El costo marg
 Antes de iniciar:
 
 1. **Permiso del micrófono** — el navegador lo pide automáticamente vía `getUserMedia`.
-2. **Aviso explícito en la app** — al cargar el modelo:
-   > *"PronunciaCoach TM activa tu micrófono para analizar pronunciación. El audio no sale de tu dispositivo. Al continuar aceptas el procesamiento local de audio con fines de retroalimentación personal."*
+2. **Aviso explícito en la app** — antes de activar el micrófono (Modo Personal y Modo Rápido) aparece un diálogo que explica qué pasa con la voz en ese modo, la finalidad y cómo retirar el permiso. Solo se continúa si el usuario pulsa **"Acepto y activar micrófono"**, y la aceptación queda registrada (fecha y versión del aviso) en el JSON de la sesión. Ejemplo para Modo Personal:
+   > *"Tu voz se analiza solo en este dispositivo, con tu modelo de Teachable Machine. No se envía ni se guarda ningún audio. Los reportes solo contienen palabras, porcentajes y horas."*
 3. **Finalidad explícita** — práctica de pronunciación personal; **nunca** para evaluar empleados, estudiantes sin su consentimiento, o emitir certificaciones.
 4. **Revocación** — cerrar la pestaña detiene el procesamiento.
 
@@ -139,7 +143,7 @@ Sí. TensorFlow.js ejecuta inferencia en el navegador con WebGL (GPU si está di
 
 Tres capas:
 1. **Captura**: `navigator.mediaDevices.getUserMedia({audio: true})` → stream de audio → Web Audio API.
-2. **Transformación + inferencia**: `speech-commands.listen()` toma ventanas de audio de ~1s, aplica Short-Time Fourier Transform, convierte a espectrograma, y lo alimenta a la red (MobileNet adaptada para audio).
+2. **Transformación + inferencia**: `speech-commands.listen()` toma ventanas de audio de ~1s, aplica Short-Time Fourier Transform, convierte a espectrograma, y lo alimenta a la red (el modelo Speech Commands de Google, una CNN que Teachable Machine reentrena con tus palabras).
 3. **Lógica de negocio**: comparar con palabra objetivo, debounce, feedback, scoring, logging y export.
 
 ### ¿Qué hace el proyecto con el modelo entrenado?
@@ -158,7 +162,9 @@ Dividir por **tomas separadas** (cada una siendo una grabación distinta, con tu
 
 ### ¿El audio se envía a algún servidor?
 
-**No.** El stream vive en Web Audio API dentro del navegador. Lo único que viaja es la descarga inicial del modelo desde el CDN de Teachable Machine. Verificable en **DevTools → Network**: después de cargar, cero peticiones.
+**En Modo Personal, no.** El stream vive en Web Audio API dentro del navegador. Lo único que viaja es la descarga inicial del modelo desde el CDN de Teachable Machine. Verificable en **DevTools → Network**: después de cargar, ninguna petición sube audio.
+
+**En Modo Rápido, sí.** La Web Speech API de Chrome envía la voz a Google para reconocerla. Ese tráfico lo hace el navegador internamente y **no aparece en DevTools**, por eso no sirve como prueba en ese modo. La app lo avisa en el diálogo de consentimiento.
 
 ### ¿Qué datos se guardan en el JSON del proyecto?
 
@@ -176,16 +182,18 @@ Dos niveles:
      "start": "2026-11-05T...",
      "end": "2026-11-05T...",
      "model_url": "https://teachablemachine.withgoogle.com/models/XXX/",
-     "mode": "teachable_machine_audio",
+     "mode": "custom_teachable_machine",
+     "consent": {"accepted_at": "2026-11-05T...", "version": "2026-11-06", "audio_leaves_device": false},
      "classes": ["ship", "sheep", "think", "sink"],
      "practice_attempts": [
        {"target": "ship", "detected": "sheep", "confidence": 0.78, "correct": false, "t": ...}
      ],
-     "free_detections": [{"word": "...", "confidence": ..., "t": ...}],
      "summary": {
        "total_attempts": 20,
        "correct": 14,
        "accuracy": 70.0,
+       "best_streak": 4,
+       "grade_0_to_5": 3.5,
        "by_word": {"ship": {"attempted": 5, "correct": 2}, ...},
        "hardest_words": [{"word": "ship", "accuracy": 0.4, "attempts": 5}],
        "recommendation": "Enfocate en la palabra ship (precision 40%)"
@@ -225,9 +233,9 @@ Por eso el diseño:
 5. **Train Model** → espera 1–2 minutos.
 6. En **Preview**, probar cada palabra. Si confunde dos → agregar más muestras diferenciadas.
 7. **Export Model** → **Tensorflow.js** → **Upload (shareable link)** → **Upload my model** → copiar URL.
-8. Abrir PronunciaCoach TM → pegar URL → **Iniciar entrenamiento** → aceptar micrófono.
-9. Modo práctica: la app muestra una palabra, el usuario la dice, recibe feedback inmediato.
-10. Al terminar: **Exportar JSON** con historial y recomendaciones.
+8. Abrir PronunciaCoach TM → **Modo Personal** → pegar URL → **Cargar modelo** → aceptar el aviso de consentimiento y el permiso del micrófono. (Atajo: abrir `index.html?model=URL_DEL_MODELO` y la URL ya queda pegada.)
+9. La app muestra una palabra, el usuario la dice y recibe feedback inmediato. Decir a propósito la palabra "trampa" (ej. *sheep* cuando pide *ship*) para mostrar que detecta la confusión.
+10. Al terminar: **Terminar sesión** → descargar la **calificación en PDF** y/o el **JSON** con historial y recomendaciones.
 11. **Fallback**: si falla micrófono/red, usar **Modo demo** para mostrar flujo.
 
 ---
