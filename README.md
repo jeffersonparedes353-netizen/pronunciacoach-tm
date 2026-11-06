@@ -190,4 +190,4 @@ MIT — ver [LICENSE](LICENSE).
 
 ## Equipo
 
-Jefferson Paredes · Jhon Deyby Higuita · Jorman Santiago Cataño — Ingeniería de Software, Pascual Bravo (2026)
+Jefferson Paredes · Jhon Deyby Piedrahita Higuita · Jorman Santiago Cataño — Ingeniería de Software, Pascual Bravo (2026)
