@@ -1,5 +1,5 @@
 # PronunciaCoach TM — Guion de exposición
-### Programación Avanzada · Pascual Bravo · Jefferson Paredes
+### Programación Avanzada · Pascual Bravo · Jefferson Paredes-Jhon Piedrahita-Jorman Cataño
 
 ---
 
