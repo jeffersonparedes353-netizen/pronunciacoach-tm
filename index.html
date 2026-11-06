@@ -194,11 +194,14 @@
     gap: 14px; margin-top: 12px;
   }
   .mode-card {
-    position: relative; border: 2px solid var(--line); border-radius: 18px; padding: 20px;
+    position: relative; width: 100%; text-align: left; font: inherit; color: inherit;
+    /* contenido arriba (los botones lo centran en vertical por defecto) */
+    display: flex; flex-direction: column; align-items: flex-start; justify-content: flex-start; gap: 0;
+    border: 2px solid var(--line); border-radius: 18px; padding: 20px;
     cursor: pointer; background: var(--surface-2);
     transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s, background 0.2s;
   }
-  .mode-card:hover { border-color: var(--brand); background: #fff; transform: translateY(-3px); box-shadow: 0 14px 30px rgba(109,93,252,0.18); }
+  .mode-card:hover:not(:disabled) { border-color: var(--brand); background: #fff; transform: translateY(-3px); box-shadow: 0 14px 30px rgba(109,93,252,0.18); }
   .mode-card.recommended { border-color: var(--ok); background: #f0fdf8; }
   .mode-card.recommended::before {
     content: 'RECOMENDADO'; position: absolute; top: 18px; right: 16px;
@@ -214,8 +217,8 @@
   .mi-fast { background: linear-gradient(135deg, #10b981, var(--cyan)); }
   .mi-personal { background: linear-gradient(135deg, var(--brand), var(--violet)); }
   .mi-demo { background: linear-gradient(135deg, #f59e0b, #ec4899); }
-  .mode-title { font-size: 17px; font-weight: 700; color: var(--ink); margin-bottom: 6px; }
-  .mode-desc { font-size: 13px; color: var(--muted); line-height: 1.45; }
+  .mode-title { display: block; font-size: 17px; font-weight: 700; color: var(--ink); margin-bottom: 6px; }
+  .mode-desc { display: block; font-size: 13px; color: var(--muted); line-height: 1.45; }
 
   #live-panel { display: none; }
 
@@ -538,37 +541,37 @@
   <h2>Elige modo</h2>
 
   <div class="mode-grid">
-    <div class="mode-card recommended" role="button" tabindex="0" onclick="startMode('express')">
-      <div class="mode-icon mi-fast" aria-hidden="true">
+    <button type="button" class="mode-card recommended" onclick="startMode('express')">
+      <span class="mode-icon mi-fast" aria-hidden="true">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-      </div>
-      <div class="mode-title">Modo Rapido (SR Web)</div>
-      <div class="mode-desc">
+      </span>
+      <span class="mode-title">Modo Rapido (SR Web)</span>
+      <span class="mode-desc">
         Arranca al instante. Usa el reconocimiento de voz nativo del navegador (Web Speech Recognition API con el motor de Google) + audios nativos de Dictionary API. Funciona para cualquier palabra en ingles.
         <br><strong>Sin descargas ni configuracion.</strong>
-      </div>
-    </div>
+      </span>
+    </button>
 
-    <div class="mode-card" role="button" tabindex="0" onclick="showCustomMode()">
-      <div class="mode-icon mi-personal" aria-hidden="true">
+    <button type="button" class="mode-card" onclick="showCustomMode()">
+      <span class="mode-icon mi-personal" aria-hidden="true">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="4"/><path d="M2 21v-1a7 7 0 0 1 14 0v1"/><path d="M17 5.5a4 4 0 0 1 0 5"/><path d="M20 3a8 8 0 0 1 0 10"/></svg>
-      </div>
-      <div class="mode-title">Modo Personal</div>
-      <div class="mode-desc">
+      </span>
+      <span class="mode-title">Modo Personal</span>
+      <span class="mode-desc">
         Entrena tu propio modelo TM Audio con las palabras que tu quieras (pares minimos dificiles: ship/sheep, think/sink...).
         <br>Requiere entrenamiento previo en teachablemachine.withgoogle.com.
-      </div>
-    </div>
+      </span>
+    </button>
 
-    <div class="mode-card" role="button" tabindex="0" onclick="startMode('demo')">
-      <div class="mode-icon mi-demo" aria-hidden="true">
+    <button type="button" class="mode-card" onclick="startMode('demo')">
+      <span class="mode-icon mi-demo" aria-hidden="true">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg>
-      </div>
-      <div class="mode-title">Modo Demo</div>
-      <div class="mode-desc">
+      </span>
+      <span class="mode-title">Modo Demo</span>
+      <span class="mode-desc">
         Simula predicciones sin micro ni modelo. Para presentar el flujo si falla el equipo.
-      </div>
-    </div>
+      </span>
+    </button>
   </div>
 
   <div id="custom-form" style="display:none;margin-top:18px;">
@@ -1883,12 +1886,6 @@ document.getElementById('consent-dialog').addEventListener('close', () => { if (
   }
 })();
 
-// Tarjetas de modo usables con teclado (Enter / Espacio)
-document.querySelectorAll('.mode-card').forEach(card => {
-  card.addEventListener('keydown', e => {
-    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); card.click(); }
-  });
-});
 </script>
 </body>
 </html>
