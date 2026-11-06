@@ -67,7 +67,12 @@
   .tb-link .ico { width: 18px; height: 18px; }
   .tb-title { flex: 1; text-align: center; color: #fff; font-weight: 700; font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .tb-title span { color: var(--cyan); }
-  .progress { position: absolute; left: 0; bottom: -1px; height: 3px; width: 0; background: linear-gradient(90deg, var(--cyan), var(--cream)); }
+  .progress {
+    position: absolute; left: 0; bottom: -1px; height: 3px; width: 0;
+    background: linear-gradient(90deg, var(--cyan), var(--cream)); transition: width 0.55s cubic-bezier(0.22, 0.8, 0.2, 1);
+  }
+  .tb-count.bump { animation: bump 0.45s ease; }
+  @keyframes bump { 40% { transform: scale(1.18); background: rgba(151,215,255,0.28); color: #fff; } }
 
   /* ===== Estructura: barra lateral + escenario ===== */
   .layout { flex: 1; min-height: 0; display: flex; position: relative; }
@@ -498,6 +503,81 @@
     .logo .ico { width: 24px; height: 24px; }
   }
 
+  /* ===== Animaciones ===== */
+  /* Fondo vivo: dos luces que se desplazan lento detras de las diapositivas */
+  .viewport::before, .viewport::after {
+    content: ''; position: absolute; z-index: 0; border-radius: 50%; pointer-events: none;
+  }
+  .viewport::before {
+    width: 620px; height: 620px; top: -220px; left: -160px;
+    background: radial-gradient(circle, rgba(77,141,186,0.38), transparent 68%);
+    animation: drift1 24s ease-in-out infinite alternate;
+  }
+  .viewport::after {
+    width: 560px; height: 560px; bottom: -240px; right: -160px;
+    background: radial-gradient(circle, rgba(255,239,196,0.16), transparent 68%);
+    animation: drift2 28s ease-in-out infinite alternate;
+  }
+  @keyframes drift1 { to { transform: translate(260px, 180px) scale(1.15); } }
+  @keyframes drift2 { to { transform: translate(-280px, -140px) scale(1.1); } }
+  .track { position: relative; z-index: 1; }
+
+  /* Transicion con profundidad: la diapositiva que sale se encoge y se atenua */
+  .slide { transition: transform 0.55s cubic-bezier(0.22, 0.8, 0.2, 1), opacity 0.55s ease, filter 0.55s ease; }
+  .slide:not(.is-active) { transform: scale(0.94); opacity: 0.45; filter: saturate(0.7); }
+
+  /* Entrada escalonada del contenido (se repite cada vez que se llega a la diapositiva) */
+  .slide.is-active .anim {
+    animation: fadeUp 0.65s cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
+    animation-delay: calc(var(--d, 0) * 70ms + 120ms);
+  }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(22px); } }
+  .slide.is-active .slide-title.anim { animation-name: titleIn; }
+  @keyframes titleIn { from { opacity: 0; transform: translateY(16px); filter: blur(8px); } }
+  .slide.is-active .card.anim, .slide.is-active .g-card.anim { animation-name: cardIn; }
+  @keyframes cardIn { from { opacity: 0; transform: translateY(26px) scale(0.95); } }
+  .slide.is-active .pipe-arrow.anim { animation-name: arrowIn; }
+  @keyframes arrowIn { from { opacity: 0; transform: translateX(-14px); } }
+  .slide.is-active .table-wrap tr.anim { animation-name: rowIn; }
+  @keyframes rowIn { from { opacity: 0; transform: translateX(-18px); } }
+  /* Frases destacadas: se revelan como un resaltador */
+  .slide.is-active .callout.anim { animation-name: highlighter; animation-duration: 0.8s; }
+  @keyframes highlighter {
+    from { opacity: 0; clip-path: inset(0 100% 0 0 round 14px); }
+    30% { opacity: 1; }
+    to { opacity: 1; clip-path: inset(0 0 0 0 round 14px); }
+  }
+  /* Numeros de los pasos y palabras de la demo: rebote */
+  .slide.is-active .step.anim .step-n {
+    animation: popIn 0.6s cubic-bezier(0.3, 1.6, 0.5, 1) backwards;
+    animation-delay: calc(var(--d, 0) * 70ms + 320ms);
+  }
+  .slide.is-active .hero-brand.anim .logo { animation: popIn 0.8s cubic-bezier(0.3, 1.6, 0.5, 1) backwards; animation-delay: 0.25s; }
+  .slide.is-active .word-chips.anim span { animation: popIn 0.5s cubic-bezier(0.3, 1.6, 0.5, 1) backwards; }
+  .slide.is-active .word-chips.anim span:nth-child(1) { animation-delay: calc(var(--d, 0) * 70ms + 250ms); }
+  .slide.is-active .word-chips.anim span:nth-child(2) { animation-delay: calc(var(--d, 0) * 70ms + 340ms); }
+  .slide.is-active .word-chips.anim span:nth-child(3) { animation-delay: calc(var(--d, 0) * 70ms + 430ms); }
+  .slide.is-active .word-chips.anim span:nth-child(4) { animation-delay: calc(var(--d, 0) * 70ms + 520ms); }
+  @keyframes popIn { from { opacity: 0; transform: scale(0); } }
+  /* Dificultades: primero el problema, luego llega la solucion */
+  .slide.is-active .diff-row.anim .diff-arrow { animation: arrowIn 0.4s ease backwards; animation-delay: calc(var(--d, 0) * 70ms + 380ms); }
+  .slide.is-active .diff-row.anim .diff-fix { animation: fixIn 0.55s cubic-bezier(0.2, 0.8, 0.2, 1) backwards; animation-delay: calc(var(--d, 0) * 70ms + 480ms); }
+  @keyframes fixIn { from { opacity: 0; transform: translateX(28px); } }
+  /* Tomas vs cuadros: las barras crecen una por una */
+  .slide.is-active .split i { animation: barGrow 0.45s cubic-bezier(0.2, 0.8, 0.2, 1) backwards; animation-delay: calc(var(--i, 0) * 45ms + 500ms); }
+  @keyframes barGrow { from { opacity: 0; transform: scaleY(0); } }
+  /* Cierre: "Preguntas?" entra grande */
+  .slide.is-active.closing .slide-title.anim { animation-name: bigIn; animation-duration: 0.9s; }
+  @keyframes bigIn { from { opacity: 0; transform: scale(0.7); filter: blur(10px); } }
+  .stat { font-variant-numeric: tabular-nums; }
+  /* Tarjetas: se elevan al pasar el mouse */
+  .card { transition: transform 0.25s ease, box-shadow 0.25s ease; }
+  .card:hover { transform: translateY(-4px); box-shadow: 0 16px 32px rgba(8,98,136,0.13); }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-delay: 0s !important; }
+    .slide:not(.is-active) { transform: none; opacity: 1; filter: none; }
+  }
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
   }
@@ -507,6 +587,9 @@
     .topbar, .sidebar, .scrim, .nav-arrow, .mobile-nav, .gloss-pop, .waves, .btn-app, .g-tools { display: none !important; }
     .layout, .stage, .viewport { display: block; overflow: visible; }
     .track { display: block; transform: none !important; }
+    .slide { transform: none !important; opacity: 1 !important; filter: none !important; }
+    .anim, .anim * { animation: none !important; }
+    .viewport::before, .viewport::after { display: none; }
     .slide { width: auto; margin: 0 0 16px; overflow: visible; box-shadow: none; border: 1px solid var(--line); break-inside: avoid; }
     .notes { display: none; }
     .term { background: none; border-bottom: 1px dotted var(--muted); }
@@ -626,19 +709,19 @@
   <div class="grid-3">
     <article class="card stat-card">
       <svg class="ico"><use href="#i-clock"/></svg>
-      <div class="stat">6+ h</div>
+      <div class="stat" data-count-to="6" data-suffix="+ h">6+ h</div>
       <p class="stat-title">al dia frente al computador</p>
       <p class="stat-sub">estudiando o teletrabajando</p>
     </article>
     <article class="card stat-card">
       <svg class="ico"><use href="#i-dollar"/></svg>
-      <div class="stat">$40k</div>
+      <div class="stat" data-count-to="40" data-prefix="$" data-suffix="k">$40k</div>
       <p class="stat-title">la hora de clase particular</p>
       <p class="stat-sub">y solo cuando el profesor puede</p>
     </article>
     <article class="card stat-card">
       <svg class="ico"><use href="#i-x-circle"/></svg>
-      <div class="stat">~0%</div>
+      <div class="stat" data-count-from="100" data-count-to="0" data-prefix="~" data-suffix="%">~0%</div>
       <p class="stat-title">feedback util de Duolingo</p>
       <p class="stat-sub">marca "bien" casi todo con reconocimiento generico</p>
     </article>
@@ -1365,6 +1448,54 @@ const sideLinks = slides.map((s, i) => {
   return a;
 });
 
+// ============================================================
+// Animaciones de entrada
+// ============================================================
+// Elementos que entran escalonados; --d es su orden dentro de la diapositiva
+const ANIM_SELECTOR = [
+  '.slide-head', '.hero-brand', '.slide-title', '.lead', '.meta > div', '.hint', '.toc a',
+  '.card', '.step', '.pipe-arrow', '.note-box', '.callout', '.table-wrap tr', '.cost',
+  '.diff-head', '.diff-row', '.word-chips', '.btn-app', '.quote', '.closing-foot', '.g-tools', '.g-card'
+].join(', ');
+slides.forEach(s => {
+  let n = 0;
+  s.querySelectorAll(ANIM_SELECTOR).forEach(el => {
+    if (el.closest('.notes')) return;
+    el.classList.add('anim');
+    el.style.setProperty('--d', Math.min(n++, 16));
+  });
+});
+// Barras de train/test: crecen una por una
+document.querySelectorAll('.split').forEach(sp => sp.querySelectorAll('i').forEach((el, k) => el.style.setProperty('--i', k)));
+
+// Cifras que se cuentan solas (ej. 0 -> 40, o 100 -> 0)
+function runCounters(slide) {
+  slide.querySelectorAll('[data-count-to]').forEach(el => {
+    const from = Number(el.dataset.countFrom || 0), to = Number(el.dataset.countTo);
+    const pre = el.dataset.prefix || '', suf = el.dataset.suffix || '';
+    cancelAnimationFrame(el._raf);
+    if (reduceMotion()) { el.textContent = pre + to + suf; return; }
+    const start = performance.now() + 380, dur = 1200;
+    el.textContent = pre + from + suf;
+    const tick = now => {
+      const p = Math.min(1, Math.max(0, (now - start) / dur));
+      const eased = 1 - Math.pow(1 - p, 3);
+      el.textContent = pre + Math.round(from + (to - from) * eased) + suf;
+      if (p < 1) el._raf = requestAnimationFrame(tick);
+    };
+    el._raf = requestAnimationFrame(tick);
+  });
+}
+
+// Reinicia la entrada de la diapositiva para que la animacion se repita en cada visita
+function activateSlide(s) {
+  slides.forEach(el => { if (el !== s) el.classList.remove('is-active'); });
+  s.classList.remove('is-active');
+  void s.offsetWidth;
+  s.classList.add('is-active');
+  runCounters(s);
+}
+
 function goTo(i, { instant = false, keepScroll = false } = {}) {
   i = Math.max(0, Math.min(slides.length - 1, i));
   if (i === current && !instant) return;
@@ -1376,10 +1507,12 @@ function goTo(i, { instant = false, keepScroll = false } = {}) {
   if (instant || reduceMotion()) { void track.offsetWidth; track.style.transition = ''; }
   // Solo la diapositiva visible recibe foco y lectores de pantalla
   slides.forEach((el, k) => { el.inert = k !== i; });
+  activateSlide(s);
   sideLinks.forEach((a, k) => a.setAttribute('aria-current', k === i ? 'true' : 'false'));
   const label = s.id === 'glosario' ? 'Glosario' : `${i + 1} / ${NUMBERED}`;
   ui.count.textContent = label;
   ui.mCount.textContent = label;
+  ui.count.classList.remove('bump'); void ui.count.offsetWidth; ui.count.classList.add('bump');
   ui.prev.disabled = ui.mPrev.disabled = i === 0;
   ui.next.disabled = ui.mNext.disabled = i === slides.length - 1;
   ui.progress.style.width = (i / (slides.length - 1)) * 100 + '%';
